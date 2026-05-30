@@ -36,6 +36,12 @@ GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Ba
 
 Drop-in replacement for the lrclib `/api/get` endpoint. All four query parameters are required.
 
+**Optional parameter:**
+
+| Parameter    | Description                                                                     |
+| ------------ | ------------------------------------------------------------------------------- |
+| `force=true` | Bypass the cache and always query lrclib upstream, then update the cached entry |
+
 **200 — cache hit or upstream found:**
 
 ```json
@@ -55,6 +61,8 @@ Drop-in replacement for the lrclib `/api/get` endpoint. All four query parameter
 ```
 
 **502** — upstream request failed (network error or lrclib 5xx). Not cached; the next request will retry.
+
+**Search fallback:** if `/api/get` returns 404, the proxy automatically retries via lrclib's `/api/search` endpoint, picking the first result that has synced lyrics and a duration within ±2 seconds of the requested duration. If a match is found it is cached as a hit (200); otherwise the 404 is cached normally.
 
 ---
 
@@ -141,13 +149,14 @@ env_file: .env
 
 ## Cache behaviour
 
-| Scenario                      | Behaviour                                                        |
-| ----------------------------- | ---------------------------------------------------------------- |
-| Track cached (200)            | Returned from SQLite immediately — upstream never called         |
-| Track cached (404), age < TTL | 404 returned immediately — upstream never called                 |
-| Track cached (404), age ≥ TTL | Re-queried from upstream; record updated                         |
-| Track not in cache            | Queried from upstream; result cached regardless of 200 or 404    |
-| Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream |
+| Scenario                      | Behaviour                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| Track cached (200)            | Returned from SQLite immediately — upstream never called                             |
+| Track cached (404), age < TTL | 404 returned immediately — upstream never called                                     |
+| Track cached (404), age ≥ TTL | Re-queried from upstream; record updated                                             |
+| Track not in cache            | Queried from upstream (with search fallback); result cached regardless of 200 or 404 |
+| `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                     |
+| Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                     |
 
 > **Note:** artist name, track name, and album name are normalised (lowercased and trimmed) before storage, so `Taylor Swift` and `taylor swift` resolve to the same cache entry.
 
