@@ -148,6 +148,17 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		syncedLyrics = &result.SyncedLyrics
 	}
 
+	// /api/get returned 200 but no synced lyrics — try the search fallback.
+	if syncedLyrics == nil && !result.Instrumental {
+		searchResult, searchErr := h.client.SearchLyrics(r.Context(), trackName, duration)
+		if searchErr != nil {
+			slog.Warn("search fallback failed", "err", searchErr, "track", trackName)
+		} else if searchResult != nil && searchResult.SyncedLyrics != "" {
+			slog.Info("found synced lyrics via search fallback", "track", trackName, "artist", artistName)
+			syncedLyrics = &searchResult.SyncedLyrics
+		}
+	}
+
 	if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, syncedLyrics, result.Instrumental); dbErr != nil {
 		slog.Error("db insert hit failed", "err", dbErr)
 	}
