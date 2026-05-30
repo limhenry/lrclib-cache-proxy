@@ -130,7 +130,7 @@ All options are set via environment variables.
 | `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file                                                                    |
 | `LRCLIB_BASE_URL`    | `https://lrclib.net` | Base URL of the upstream lrclib instance                                                            |
 | `NOT_FOUND_TTL_DAYS` | `7`                  | Days to serve a cached 404 before re-checking upstream                                              |
-| `ALLOWED_ORIGINS`    | *(empty)*            | Comma-separated extra CORS origins beyond `http://localhost:*` (e.g. `https://example.com`)         |
+| `ALLOWED_ORIGINS`    | _(empty)_            | Comma-separated extra CORS origins beyond `http://localhost:*` (e.g. `https://example.com`)         |
 
 Copy `.env.example` to `.env` and edit as needed, then pass it to Compose:
 
