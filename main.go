@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -25,6 +26,43 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+// corsMiddleware allows origins listed in ALLOWED_ORIGINS (comma-separated).
+// Supports a trailing "*" wildcard, e.g. "http://localhost:*" matches any port.
+func corsMiddleware(allowedOrigins []string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			if origin != "" {
+				for _, allowed := range allowedOrigins {
+					if originMatches(allowed, origin) {
+						w.Header().Set("Access-Control-Allow-Origin", origin)
+						w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+						w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+						w.Header().Set("Vary", "Origin")
+						break
+					}
+				}
+			}
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// originMatches checks if an origin matches a pattern.
+// A pattern ending in ":*" matches any port on that scheme+host,
+// e.g. "http://localhost:*" matches "http://localhost:3000".
+func originMatches(pattern, origin string) bool {
+	if strings.HasSuffix(pattern, ":*") {
+		prefix := strings.TrimSuffix(pattern, ":*") + ":"
+		return strings.HasPrefix(origin, prefix)
+	}
+	return pattern == origin
+}
+
 func main() {
 	port := getEnv("PORT", "3000")
 	dbPath := getEnv("DB_PATH", "./lyrics.db")
@@ -32,6 +70,13 @@ func main() {
 	notFoundTTLDays, _ := strconv.Atoi(getEnv("NOT_FOUND_TTL_DAYS", "7"))
 	if notFoundTTLDays <= 0 {
 		notFoundTTLDays = 7
+	}
+
+	allowedOrigins := []string{"http://localhost:*"}
+	for _, o := range strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",") {
+		if o = strings.TrimSpace(o); o != "" {
+			allowedOrigins = append(allowedOrigins, o)
+		}
 	}
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -54,6 +99,7 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(corsMiddleware(allowedOrigins))
 
 	r.Get("/api/get", proxyH.ServeHTTP)
 

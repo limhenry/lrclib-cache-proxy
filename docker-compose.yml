@@ -9,6 +9,7 @@ services:
       - DB_PATH=/data/lyrics.db
       - LRCLIB_BASE_URL=https://lrclib.net
       - NOT_FOUND_TTL_DAYS=7
+      - ALLOWED_ORIGINS=
     volumes:
       - lrclib-cache-proxy-data:/data
 
