@@ -101,6 +101,23 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var nfe *lrclib.NotFoundError
 		if errors.As(err, &nfe) {
+			// Fallback: search by track name, pick the first result that has
+			// synced lyrics and a duration within ±2 s of the requested duration.
+			searchResult, searchErr := h.client.SearchLyrics(r.Context(), trackName, duration)
+			if searchErr != nil {
+				slog.Warn("search fallback failed", "err", searchErr, "track", trackName)
+			} else if searchResult != nil {
+				var syncedLyrics *string
+				if searchResult.SyncedLyrics != "" {
+					syncedLyrics = &searchResult.SyncedLyrics
+				}
+				if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, syncedLyrics, searchResult.Instrumental); dbErr != nil {
+					slog.Error("db insert hit (search fallback) failed", "err", dbErr)
+				}
+				slog.Info("cached track via search fallback", "track", trackName, "artist", artistName)
+				writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
+				return
+			}
 			if dbErr := h.db.InsertNotFound(artistName, trackName, albumName, duration); dbErr != nil {
 				slog.Error("db insert not-found failed", "err", dbErr)
 			}
