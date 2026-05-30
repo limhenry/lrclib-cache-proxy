@@ -70,11 +70,16 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := h.db.Lookup(artistName, trackName, albumName, duration)
-	if err != nil {
-		slog.Error("db lookup failed", "err", err)
-		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
-		return
+	force := q.Get("force") == "true"
+
+	var entry *db.CacheEntry
+	if !force {
+		entry, err = h.db.Lookup(artistName, trackName, albumName, duration)
+		if err != nil {
+			slog.Error("db lookup failed", "err", err)
+			writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
+			return
+		}
 	}
 
 	if entry != nil {
