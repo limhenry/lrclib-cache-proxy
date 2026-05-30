@@ -4,9 +4,8 @@ services:
     container_name: lrclib-cache-proxy
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-3000}:3000"
     environment:
-      - PORT=3000
       - DB_PATH=/data/lyrics.db
       - LRCLIB_BASE_URL=https://lrclib.net
       - NOT_FOUND_TTL_DAYS=7

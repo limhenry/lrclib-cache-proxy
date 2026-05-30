@@ -123,12 +123,13 @@ Paginated list of tracks that returned 404, newest first. Includes `retryAfter` 
 
 All options are set via environment variables.
 
-| Variable             | Default              | Description                                            |
-| -------------------- | -------------------- | ------------------------------------------------------ |
-| `PORT`               | `3000`               | Port the HTTP server listens on                        |
-| `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file                       |
-| `LRCLIB_BASE_URL`    | `https://lrclib.net` | Base URL of the upstream lrclib instance               |
-| `NOT_FOUND_TTL_DAYS` | `7`                  | Days to serve a cached 404 before re-checking upstream |
+| Variable             | Default              | Description                                                                                         |
+| -------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `HOST_PORT`          | `3000`               | Host port Docker binds on — change this to expose on a different port (e.g. `9876`)                 |
+| `PORT`               | `3000`               | Port the binary listens on **inside** the container — only needed if you change the `ports` mapping |
+| `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file                                                                    |
+| `LRCLIB_BASE_URL`    | `https://lrclib.net` | Base URL of the upstream lrclib instance                                                            |
+| `NOT_FOUND_TTL_DAYS` | `7`                  | Days to serve a cached 404 before re-checking upstream                                              |
 
 Copy `.env.example` to `.env` and edit as needed, then pass it to Compose:
 
