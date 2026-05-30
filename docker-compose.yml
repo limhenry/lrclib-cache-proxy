@@ -1,0 +1,17 @@
+services:
+  lrcproxy:
+    build: .
+    container_name: lrcproxy
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/data/lyrics.db
+      - LRCLIB_BASE_URL=https://lrclib.net
+      - NOT_FOUND_TTL_DAYS=7
+    volumes:
+      - lrcproxy-data:/data
+
+volumes:
+  lrcproxy-data:
