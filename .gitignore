@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# Binary
+lrclib-cache-proxy
+
+# Environment
+.env
