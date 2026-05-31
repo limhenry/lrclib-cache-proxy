@@ -92,12 +92,12 @@ func (c *Client) GetLyrics(ctx context.Context, artistName, trackName, albumName
 	return &result, nil
 }
 
-// SearchLyrics calls /api/search?track_name=... and returns the first result
+// SearchLyrics calls /api/search?q=... and returns the first result
 // that has synced lyrics and a duration within ±2 s of the requested duration.
 // Returns nil, nil when no matching result is found.
-func (c *Client) SearchLyrics(ctx context.Context, trackName string, duration int) (*LyricsResponse, error) {
+func (c *Client) SearchLyrics(ctx context.Context, q string, duration int) (*LyricsResponse, error) {
 	params := url.Values{}
-	params.Set("track_name", trackName)
+	params.Set("q", q)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/api/search?"+params.Encode(), nil)
 	if err != nil {
