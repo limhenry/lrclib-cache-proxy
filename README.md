@@ -40,13 +40,15 @@ GET /api/get?videoId=B7kKeTRV0Xs
 
 Only `videoId` is required. Fetches timed/synced lyrics directly from YouTube Music API (based on [this Gist](https://gist.github.com/limhenry/d9ba0f65234a496a16999714fc87ac78) and inspired by [ytmusicapi](https://github.com/sigma67/ytmusicapi)).
 
-#### Option 2: LRCLIB (via track metadata)
+#### Option 2: Track metadata (YouTube Music search first with LRCLIB fallback)
 
 ```
 GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Baldur%27s+Gate+3+(Original+Game+Soundtrack)&duration=233
 ```
 
 All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`) are required.
+
+When metadata parameters are passed, the proxy searches YouTube Music first for a matching track and attempts to fetch synced lyrics. If YouTube Music returns no lyrics or fails, it automatically falls back to LRCLIB.
 
 **Optional parameter (supported on both):**
 
@@ -74,7 +76,11 @@ All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`
 
 **502** — upstream request failed (network error or 5xx). Not cached; the next request will retry.
 
-**LRCLIB search fallback:** if LRCLIB `/api/get` returns 404, the proxy automatically retries via lrclib's `/api/search` endpoint, picking the first result that has synced lyrics and a duration within ±2 seconds of the requested duration. If a match is found it is cached as a hit (200); otherwise the 404 is cached normally.
+**Fallback sequence:**
+1. **YouTube Music Search**: Searches YouTube Music using track metadata and ranks candidate video IDs by title, artist, album, and duration similarity. If a matching video ID with synced lyrics is found, it is returned and cached in SQLite under `(artist_name, track_name, album_name, duration)`.
+2. **LRCLIB Lookup**: If YouTube Music returns no lyrics or fails, the proxy queries LRCLIB `/api/get`.
+3. **LRCLIB Search Fallback**: If LRCLIB `/api/get` returns 404, it retries via LRCLIB `/api/search` for a track with synced lyrics within ±2 seconds duration.
+4. If a match is found from either provider, it is cached in SQLite as a hit (200); otherwise the 404 is cached normally.
 
 ---
 
@@ -170,14 +176,14 @@ env_file: .env
 
 ## Cache behaviour
 
-| Scenario                      | Behaviour                                                                            |
-| ----------------------------- | ------------------------------------------------------------------------------------ |
-| Track cached (200)            | Returned from SQLite immediately — upstream never called                             |
-| Track cached (404), age < TTL | 404 returned immediately — upstream never called                                     |
-| Track cached (404), age ≥ TTL | Re-queried from upstream; record updated                                             |
-| Track not in cache            | Queried from upstream (with search fallback); result cached regardless of 200 or 404 |
-| `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                     |
-| Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                     |
+| Scenario                      | Behaviour                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Track cached (200)            | Returned from SQLite immediately — upstream never called                                                |
+| Track cached (404), age < TTL | 404 returned immediately — upstream never called                                                        |
+| Track cached (404), age ≥ TTL | Re-queried from upstream (YouTube Music search first, then LRCLIB); record updated                       |
+| Track not in cache            | Searched on YouTube Music first, fallback to LRCLIB + search fallback; result cached (200 or 404) in DB |
+| `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                                        |
+| Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                                        |
 
 > **Note:** artist name, track name, and album name are normalised (lowercased and trimmed) before storage, so `Taylor Swift` and `taylor swift` resolve to the same cache entry. Video IDs are case-sensitive and only trimmed.
 
@@ -197,9 +203,13 @@ DB_PATH=./lyrics.db ./lrclib-cache-proxy
 ├── main.go             # Entry point — config, router, graceful shutdown
 ├── db/db.go            # SQLite layer — schema, upserts, paginated queries
 ├── lrclib/client.go    # Upstream LRCLIB HTTP client
-├── ytmusic/client.go   # Upstream YouTube Music API HTTP client
+├── ytmusic/
+│   ├── client.go       # YouTube Music client struct, constructor, shared types
+│   ├── search.go       # Search API (/youtubei/v1/search) & video ID scoring
+│   ├── next.go         # Next API (/youtubei/v1/next) & browseId lookup
+│   └── browse.go       # Browse API (/youtubei/v1/browse) & synced lyrics fetching
 ├── handler/
-│   ├── proxy.go        # GET /api/get — cache logic for LRCLIB and YouTube Music
+│   ├── proxy.go        # GET /api/get — cache logic for YouTube Music and LRCLIB
 │   └── admin.go        # GET /admin/* — stats and list endpoints
 ├── Dockerfile          # Multi-stage build: golang:1.25-alpine → alpine:3.21
 └── docker-compose.yml

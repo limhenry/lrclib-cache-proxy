@@ -178,7 +178,27 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 		slog.Info("404 TTL expired, re-querying upstream", "track", trackName, "artist", artistName)
 	}
 
-	// Cache miss or expired 404 — call lrclib.
+	// Cache miss or expired 404 — try YouTube Music first.
+	videoID, ytErr := h.ytClient.GetVideoID(r.Context(), trackName, artistName, albumName, duration)
+	if ytErr != nil {
+		slog.Warn("ytmusic get video id failed, falling back to lrclib", "err", ytErr, "track", trackName)
+	} else if videoID != "" {
+		syncedLyrics, lyricsErr := h.ytClient.GetSyncedLyrics(r.Context(), videoID)
+		if lyricsErr == nil && syncedLyrics != "" {
+			if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, &syncedLyrics, false); dbErr != nil {
+				slog.Error("db insert hit (ytmusic) failed", "err", dbErr)
+			}
+			if dbErr := h.db.InsertYTHit(videoID, &syncedLyrics); dbErr != nil {
+				slog.Error("db insert yt hit failed", "err", dbErr)
+			}
+			slog.Info("cached track via ytmusic", "track", trackName, "artist", artistName, "videoId", videoID)
+			writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: &syncedLyrics})
+			return
+		}
+		slog.Info("ytmusic get lyrics failed or empty, falling back to lrclib", "err", lyricsErr, "track", trackName, "videoId", videoID)
+	}
+
+	// Fallback: call LRCLIB.
 	result, err := h.client.GetLyrics(r.Context(), artistName, trackName, albumName, duration)
 	if err != nil {
 		var nfe *lrclib.NotFoundError
