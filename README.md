@@ -1,8 +1,8 @@
 # lrclib-cache-proxy
 
-A lightweight caching proxy for [lrclib.net](https://lrclib.net) — a free, open-source synced lyrics API.
+A lightweight caching proxy for [lrclib.net](https://lrclib.net) and YouTube Music API for synced lyrics.
 
-Requests are served from a local SQLite database on cache hits, so repeat lookups are instant and don't consume lrclib's bandwidth. 404 responses are remembered for 7 days before the upstream is re-checked (in case lrclib has since added the track).
+Requests are served from a local SQLite database on cache hits, so repeat lookups are instant and don't consume upstream bandwidth. 404 responses are remembered for 7 days before the upstream is re-checked (in case lyrics have since been added).
 
 Docker image: **~8 MB**. Idle RAM: **~15–20 MB**.
 
@@ -110,6 +110,10 @@ Paginated list of successfully cached tracks, newest first.
       "albumName": "baldur's gate 3 (original game soundtrack)",
       "duration": 233,
       "cachedAt": "2026-05-30T09:41:00Z"
+    },
+    {
+      "videoId": "B7kKeTRV0Xs",
+      "cachedAt": "2026-05-30T09:30:00Z"
     }
   ]
 }
@@ -117,7 +121,7 @@ Paginated list of successfully cached tracks, newest first.
 
 #### `GET /admin/not-found?page=1&limit=50`
 
-Paginated list of tracks that returned 404, newest first. Includes `retryAfter` so you can see when the proxy will re-check lrclib.
+Paginated list of tracks that returned 404, newest first. Includes `retryAfter` so you can see when the proxy will re-check the upstream provider.
 
 ```json
 {
@@ -132,6 +136,11 @@ Paginated list of tracks that returned 404, newest first. Includes `retryAfter` 
       "duration": 180,
       "notFoundAt": "2026-05-30T09:00:00Z",
       "retryAfter": "2026-06-06T09:00:00Z"
+    },
+    {
+      "videoId": "invalid_id",
+      "notFoundAt": "2026-05-30T08:00:00Z",
+      "retryAfter": "2026-06-06T08:00:00Z"
     }
   ]
 }
@@ -170,7 +179,7 @@ env_file: .env
 | `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                     |
 | Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                     |
 
-> **Note:** artist name, track name, and album name are normalised (lowercased and trimmed) before storage, so `Taylor Swift` and `taylor swift` resolve to the same cache entry.
+> **Note:** artist name, track name, and album name are normalised (lowercased and trimmed) before storage, so `Taylor Swift` and `taylor swift` resolve to the same cache entry. Video IDs are case-sensitive and only trimmed.
 
 ## Building without Docker
 

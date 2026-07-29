@@ -139,7 +139,7 @@ func (d *DB) LookupYT(videoID string) (*CacheEntry, error) {
 		SELECT video_id, synced_lyrics, status, cached_at, not_found_at
 		FROM yt_lyrics
 		WHERE video_id=?`,
-		normalize(videoID),
+		strings.TrimSpace(videoID),
 	)
 
 	var e CacheEntry
@@ -216,7 +216,7 @@ func (d *DB) InsertYTHit(videoID string, syncedLyrics *string) error {
 		    status        = 200,
 		    cached_at     = excluded.cached_at,
 		    not_found_at  = NULL`,
-		normalize(videoID), syncedLyrics, now,
+		strings.TrimSpace(videoID), syncedLyrics, now,
 	)
 	return err
 }
@@ -233,7 +233,7 @@ func (d *DB) InsertYTNotFound(videoID string) error {
 		    status       = 404,
 		    not_found_at = excluded.not_found_at,
 		    cached_at    = excluded.cached_at`,
-		normalize(videoID), now, now,
+		strings.TrimSpace(videoID), now, now,
 	)
 	return err
 }
