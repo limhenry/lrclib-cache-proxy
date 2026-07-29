@@ -25,8 +25,8 @@ type browseResponse struct {
 							TimedLyricsModel struct {
 								LyricsData struct {
 									TimedLyricsData []struct {
-										CueRange struct {
-											StartTimeMilliseconds stringOrInt `json:"startTimeMilliseconds"`
+										CueRange *struct {
+											StartTimeMilliseconds *stringOrInt `json:"startTimeMilliseconds"`
 										} `json:"cueRange"`
 										LyricLine string `json:"lyricLine"`
 									} `json:"timedLyricsData"`
@@ -96,7 +96,10 @@ func (c *Client) GetSyncedLyrics(ctx context.Context, videoID string) (string, e
 
 	lines := make([]string, 0, len(timedData))
 	for _, l := range timedData {
-		timestamp := getTimestamp(int64(l.CueRange.StartTimeMilliseconds))
+		if l.CueRange == nil || l.CueRange.StartTimeMilliseconds == nil {
+			return "", &NotFoundError{VideoID: videoID}
+		}
+		timestamp := getTimestamp(int64(*l.CueRange.StartTimeMilliseconds))
 		lines = append(lines, fmt.Sprintf("[%s] %s", timestamp, l.LyricLine))
 	}
 
