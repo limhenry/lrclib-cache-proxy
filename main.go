@@ -18,6 +18,7 @@ import (
 	"github.com/limhenry/lrclib-cache-proxy/db"
 	"github.com/limhenry/lrclib-cache-proxy/handler"
 	"github.com/limhenry/lrclib-cache-proxy/lrclib"
+	"github.com/limhenry/lrclib-cache-proxy/ytmusic"
 )
 
 func getEnv(key, fallback string) string {
@@ -93,7 +94,8 @@ func main() {
 	slog.Info("database ready", "path", dbPath)
 
 	client := lrclib.NewClient(lrclibBaseURL)
-	proxyH := handler.NewProxyHandler(database, client, notFoundTTLDays)
+	ytClient := ytmusic.NewClient()
+	proxyH := handler.NewProxyHandler(database, client, ytClient, notFoundTTLDays)
 	adminH := handler.NewAdminHandler(database, notFoundTTLDays)
 
 	r := chi.NewRouter()

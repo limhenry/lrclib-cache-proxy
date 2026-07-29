@@ -30,25 +30,37 @@ The proxy is now listening on `http://localhost:3000`.
 
 ### Get lyrics
 
+The endpoint supports fetching lyrics via either **YouTube Music API** or **LRCLIB**:
+
+#### Option 1: YouTube Music API (via `videoId`)
+
+```
+GET /api/get?videoId=B7kKeTRV0Xs
+```
+
+Only `videoId` is required. Fetches timed/synced lyrics directly from YouTube Music API (based on [this Gist](https://gist.github.com/limhenry/d9ba0f65234a496a16999714fc87ac78) and inspired by [ytmusicapi](https://github.com/sigma67/ytmusicapi)).
+
+#### Option 2: LRCLIB (via track metadata)
+
 ```
 GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Baldur%27s+Gate+3+(Original+Game+Soundtrack)&duration=233
 ```
 
-Drop-in replacement for the lrclib `/api/get` endpoint. All four query parameters are required.
+All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`) are required.
 
-**Optional parameter:**
+**Optional parameter (supported on both):**
 
-| Parameter    | Description                                                                     |
-| ------------ | ------------------------------------------------------------------------------- |
-| `force=true` | Bypass the cache and always query lrclib upstream, then update the cached entry |
+| Parameter    | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `force=true` | Bypass the cache and always query the upstream API, then update the cached entry   |
 
 **200 — cache hit or upstream found:**
 
 ```json
-{ "syncedLyrics": "[00:17.12] I feel your breath upon my neck\n..." }
+{ "syncedLyrics": "[00:02.21] 經過沿海的公路 越過漫漫河流\n..." }
 ```
 
-`syncedLyrics` is `null` when the track is instrumental or has no synced lyrics.
+`syncedLyrics` is `null` when the track has no synced lyrics or is instrumental.
 
 **404 — not found:**
 
@@ -60,9 +72,9 @@ Drop-in replacement for the lrclib `/api/get` endpoint. All four query parameter
 }
 ```
 
-**502** — upstream request failed (network error or lrclib 5xx). Not cached; the next request will retry.
+**502** — upstream request failed (network error or 5xx). Not cached; the next request will retry.
 
-**Search fallback:** if `/api/get` returns 404, the proxy automatically retries via lrclib's `/api/search` endpoint, picking the first result that has synced lyrics and a duration within ±2 seconds of the requested duration. If a match is found it is cached as a hit (200); otherwise the 404 is cached normally.
+**LRCLIB search fallback:** if LRCLIB `/api/get` returns 404, the proxy automatically retries via lrclib's `/api/search` endpoint, picking the first result that has synced lyrics and a duration within ±2 seconds of the requested duration. If a match is found it is cached as a hit (200); otherwise the 404 is cached normally.
 
 ---
 
@@ -175,13 +187,19 @@ DB_PATH=./lyrics.db ./lrclib-cache-proxy
 .
 ├── main.go             # Entry point — config, router, graceful shutdown
 ├── db/db.go            # SQLite layer — schema, upserts, paginated queries
-├── lrclib/client.go    # Upstream HTTP client
+├── lrclib/client.go    # Upstream LRCLIB HTTP client
+├── ytmusic/client.go   # Upstream YouTube Music API HTTP client
 ├── handler/
-│   ├── proxy.go        # GET /api/get — cache logic
+│   ├── proxy.go        # GET /api/get — cache logic for LRCLIB and YouTube Music
 │   └── admin.go        # GET /admin/* — stats and list endpoints
 ├── Dockerfile          # Multi-stage build: golang:1.25-alpine → alpine:3.21
 └── docker-compose.yml
 ```
+
+## Credits
+
+- YouTube Music synced lyrics logic based on [ytmusicapi_lyrics.js Gist](https://gist.github.com/limhenry/d9ba0f65234a496a16999714fc87ac78) and inspired by [ytmusicapi](https://github.com/sigma67/ytmusicapi).
+- Upstream lyrics service by [lrclib.net](https://lrclib.net).
 
 ## License
 

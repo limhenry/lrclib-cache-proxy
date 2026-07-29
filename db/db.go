@@ -16,12 +16,13 @@ type DB struct {
 	path string
 }
 
-// CacheEntry represents a row in the lyrics table.
+// CacheEntry represents a row in the lyrics or yt_lyrics table.
 type CacheEntry struct {
 	ArtistName   string
 	TrackName    string
 	AlbumName    string
 	Duration     int
+	VideoID      string
 	SyncedLyrics *string
 	Instrumental bool
 	Status       int
@@ -66,6 +67,15 @@ func (d *DB) migrate() error {
 			UNIQUE(artist_name, track_name, album_name, duration)
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_status ON lyrics(status)`,
+		`CREATE TABLE IF NOT EXISTS yt_lyrics (
+			id            INTEGER PRIMARY KEY AUTOINCREMENT,
+			video_id      TEXT NOT NULL UNIQUE,
+			synced_lyrics TEXT,
+			status        INTEGER NOT NULL,
+			cached_at     DATETIME NOT NULL,
+			not_found_at  DATETIME
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_yt_status ON yt_lyrics(status)`,
 	}
 	for _, stmt := range stmts {
 		if _, err := d.sql.Exec(stmt); err != nil {
@@ -122,7 +132,37 @@ func (d *DB) Lookup(artistName, trackName, albumName string, duration int) (*Cac
 	return &e, nil
 }
 
-// InsertHit stores (or updates) a successful lyrics result.
+// LookupYT finds a cache entry by YouTube video ID.
+// Returns (nil, nil) when no matching entry exists.
+func (d *DB) LookupYT(videoID string) (*CacheEntry, error) {
+	row := d.sql.QueryRow(`
+		SELECT video_id, synced_lyrics, status, cached_at, not_found_at
+		FROM yt_lyrics
+		WHERE video_id=?`,
+		normalize(videoID),
+	)
+
+	var e CacheEntry
+	var cachedAt string
+	var notFoundAt *string
+
+	err := row.Scan(&e.VideoID, &e.SyncedLyrics, &e.Status, &cachedAt, &notFoundAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	e.CachedAt, _ = time.Parse(time.RFC3339, cachedAt)
+	if notFoundAt != nil {
+		t, _ := time.Parse(time.RFC3339, *notFoundAt)
+		e.NotFoundAt = &t
+	}
+	return &e, nil
+}
+
+// InsertHit stores (or updates) a successful lrclib lyrics result.
 func (d *DB) InsertHit(artistName, trackName, albumName string, duration int, syncedLyrics *string, instrumental bool) error {
 	instr := 0
 	if instrumental {
@@ -146,7 +186,7 @@ func (d *DB) InsertHit(artistName, trackName, albumName string, duration int, sy
 	return err
 }
 
-// InsertNotFound records (or refreshes) a 404 result.
+// InsertNotFound records (or refreshes) a 404 lrclib result.
 func (d *DB) InsertNotFound(artistName, trackName, albumName string, duration int) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := d.sql.Exec(`
@@ -159,6 +199,41 @@ func (d *DB) InsertNotFound(artistName, trackName, albumName string, duration in
 		    not_found_at = excluded.not_found_at,
 		    cached_at    = excluded.cached_at`,
 		normalize(artistName), normalize(trackName), normalize(albumName), duration, now, now,
+	)
+	return err
+}
+
+// InsertYTHit stores (or updates) a successful YouTube Music lyrics result.
+func (d *DB) InsertYTHit(videoID string, syncedLyrics *string) error {
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := d.sql.Exec(`
+		INSERT INTO yt_lyrics
+		    (video_id, synced_lyrics, status, cached_at)
+		VALUES (?, ?, 200, ?)
+		ON CONFLICT(video_id)
+		DO UPDATE SET
+		    synced_lyrics = excluded.synced_lyrics,
+		    status        = 200,
+		    cached_at     = excluded.cached_at,
+		    not_found_at  = NULL`,
+		normalize(videoID), syncedLyrics, now,
+	)
+	return err
+}
+
+// InsertYTNotFound records (or refreshes) a 404 YouTube Music result.
+func (d *DB) InsertYTNotFound(videoID string) error {
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := d.sql.Exec(`
+		INSERT INTO yt_lyrics
+		    (video_id, status, cached_at, not_found_at)
+		VALUES (?, 404, ?, ?)
+		ON CONFLICT(video_id)
+		DO UPDATE SET
+		    status       = 404,
+		    not_found_at = excluded.not_found_at,
+		    cached_at    = excluded.cached_at`,
+		normalize(videoID), now, now,
 	)
 	return err
 }
@@ -176,10 +251,10 @@ type Summary struct {
 func (d *DB) GetSummary() (*Summary, error) {
 	var s Summary
 
-	if err := d.sql.QueryRow(`SELECT COUNT(*) FROM lyrics WHERE status=200`).Scan(&s.CachedCount); err != nil {
+	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=200) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=200)`).Scan(&s.CachedCount); err != nil {
 		return nil, err
 	}
-	if err := d.sql.QueryRow(`SELECT COUNT(*) FROM lyrics WHERE status=404`).Scan(&s.NotFoundCount); err != nil {
+	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=404) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=404)`).Scan(&s.NotFoundCount); err != nil {
 		return nil, err
 	}
 
@@ -188,7 +263,7 @@ func (d *DB) GetSummary() (*Summary, error) {
 	}
 
 	var oldest, newest *string
-	_ = d.sql.QueryRow(`SELECT MIN(cached_at), MAX(cached_at) FROM lyrics`).Scan(&oldest, &newest)
+	_ = d.sql.QueryRow(`SELECT MIN(cached_at), MAX(cached_at) FROM (SELECT cached_at FROM lyrics UNION ALL SELECT cached_at FROM yt_lyrics)`).Scan(&oldest, &newest)
 	s.OldestCachedAt = oldest
 	s.NewestCachedAt = newest
 
@@ -197,23 +272,28 @@ func (d *DB) GetSummary() (*Summary, error) {
 
 // SongEntry is one row in the cached-hits list.
 type SongEntry struct {
-	ArtistName string `json:"artistName"`
-	TrackName  string `json:"trackName"`
-	AlbumName  string `json:"albumName"`
-	Duration   int    `json:"duration"`
+	ArtistName string `json:"artistName,omitempty"`
+	TrackName  string `json:"trackName,omitempty"`
+	AlbumName  string `json:"albumName,omitempty"`
+	Duration   int    `json:"duration,omitempty"`
+	VideoID    string `json:"videoId,omitempty"`
 	CachedAt   string `json:"cachedAt"`
 }
 
 // ListSongs returns a paginated list of cached hits, newest first.
 func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
 	var total int
-	if err := d.sql.QueryRow(`SELECT COUNT(*) FROM lyrics WHERE status=200`).Scan(&total); err != nil {
+	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=200) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=200)`).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
 	rows, err := d.sql.Query(`
-		SELECT artist_name, track_name, album_name, duration, cached_at
-		FROM lyrics WHERE status=200
+		SELECT artist_name, track_name, album_name, duration, video_id, cached_at
+		FROM (
+			SELECT artist_name, track_name, album_name, duration, '' AS video_id, cached_at FROM lyrics WHERE status=200
+			UNION ALL
+			SELECT '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, cached_at FROM yt_lyrics WHERE status=200
+		)
 		ORDER BY cached_at DESC
 		LIMIT ? OFFSET ?`, limit, (page-1)*limit)
 	if err != nil {
@@ -224,7 +304,7 @@ func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
 	songs := make([]SongEntry, 0, limit)
 	for rows.Next() {
 		var s SongEntry
-		if err := rows.Scan(&s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.CachedAt); err != nil {
+		if err := rows.Scan(&s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.VideoID, &s.CachedAt); err != nil {
 			return nil, 0, err
 		}
 		songs = append(songs, s)
@@ -234,10 +314,11 @@ func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
 
 // NotFoundEntry is one row in the 404 list.
 type NotFoundEntry struct {
-	ArtistName string `json:"artistName"`
-	TrackName  string `json:"trackName"`
-	AlbumName  string `json:"albumName"`
-	Duration   int    `json:"duration"`
+	ArtistName string `json:"artistName,omitempty"`
+	TrackName  string `json:"trackName,omitempty"`
+	AlbumName  string `json:"albumName,omitempty"`
+	Duration   int    `json:"duration,omitempty"`
+	VideoID    string `json:"videoId,omitempty"`
 	NotFoundAt string `json:"notFoundAt"`
 	RetryAfter string `json:"retryAfter"`
 }
@@ -245,13 +326,17 @@ type NotFoundEntry struct {
 // ListNotFound returns a paginated list of 404 entries, newest first.
 func (d *DB) ListNotFound(page, limit, ttlDays int) ([]NotFoundEntry, int, error) {
 	var total int
-	if err := d.sql.QueryRow(`SELECT COUNT(*) FROM lyrics WHERE status=404`).Scan(&total); err != nil {
+	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=404) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=404)`).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
 	rows, err := d.sql.Query(`
-		SELECT artist_name, track_name, album_name, duration, not_found_at
-		FROM lyrics WHERE status=404
+		SELECT artist_name, track_name, album_name, duration, video_id, not_found_at
+		FROM (
+			SELECT artist_name, track_name, album_name, duration, '' AS video_id, not_found_at FROM lyrics WHERE status=404
+			UNION ALL
+			SELECT '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, not_found_at FROM yt_lyrics WHERE status=404
+		)
 		ORDER BY not_found_at DESC
 		LIMIT ? OFFSET ?`, limit, (page-1)*limit)
 	if err != nil {
@@ -263,7 +348,7 @@ func (d *DB) ListNotFound(page, limit, ttlDays int) ([]NotFoundEntry, int, error
 	for rows.Next() {
 		var e NotFoundEntry
 		var notFoundAt string
-		if err := rows.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &notFoundAt); err != nil {
+		if err := rows.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.VideoID, &notFoundAt); err != nil {
 			return nil, 0, err
 		}
 		e.NotFoundAt = notFoundAt

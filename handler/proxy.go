@@ -6,24 +6,28 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/limhenry/lrclib-cache-proxy/db"
 	"github.com/limhenry/lrclib-cache-proxy/lrclib"
+	"github.com/limhenry/lrclib-cache-proxy/ytmusic"
 )
 
-// ProxyHandler handles GET /api/get with local caching.
+// ProxyHandler handles GET /api/get with local caching for LRCLIB and YouTube Music.
 type ProxyHandler struct {
 	db          *db.DB
 	client      *lrclib.Client
+	ytClient    *ytmusic.Client
 	notFoundTTL time.Duration
 }
 
 // NewProxyHandler creates a ProxyHandler.
-func NewProxyHandler(database *db.DB, client *lrclib.Client, notFoundTTLDays int) *ProxyHandler {
+func NewProxyHandler(database *db.DB, client *lrclib.Client, ytClient *ytmusic.Client, notFoundTTLDays int) *ProxyHandler {
 	return &ProxyHandler{
 		db:          database,
 		client:      client,
+		ytClient:    ytClient,
 		notFoundTTL: time.Duration(notFoundTTLDays) * 24 * time.Hour,
 	}
 }
@@ -46,6 +50,14 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
+	videoID := strings.TrimSpace(q.Get("videoId"))
+	force := q.Get("force") == "true"
+
+	if videoID != "" {
+		h.handleYouTube(w, r, videoID, force)
+		return
+	}
+
 	artistName := q.Get("artist_name")
 	trackName := q.Get("track_name")
 	albumName := q.Get("album_name")
@@ -55,7 +67,7 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
 			Code:    400,
 			Name:    "BadRequest",
-			Message: "artist_name, track_name, album_name and duration are all required",
+			Message: "artist_name, track_name, album_name and duration are required, or videoId is required",
 		})
 		return
 	}
@@ -70,9 +82,74 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	force := q.Get("force") == "true"
+	h.handleLRCLIB(w, r, artistName, trackName, albumName, duration, force)
+}
 
+func (h *ProxyHandler) handleYouTube(w http.ResponseWriter, r *http.Request, videoID string, force bool) {
 	var entry *db.CacheEntry
+	var err error
+	if !force {
+		entry, err = h.db.LookupYT(videoID)
+		if err != nil {
+			slog.Error("db yt lookup failed", "err", err, "videoId", videoID)
+			writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
+			return
+		}
+	}
+
+	if entry != nil {
+		if entry.Status == 200 {
+			slog.Debug("yt cache hit (200)", "videoId", videoID)
+			writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: entry.SyncedLyrics})
+			return
+		}
+		// Status == 404
+		if entry.NotFoundAt != nil && time.Since(*entry.NotFoundAt) < h.notFoundTTL {
+			slog.Debug("yt cache hit (404, still fresh)", "videoId", videoID)
+			writeJSON(w, http.StatusNotFound, errorResponse{
+				Code:    404,
+				Name:    "TrackNotFound",
+				Message: "Failed to find specified track",
+			})
+			return
+		}
+		slog.Info("yt 404 TTL expired, re-querying upstream", "videoId", videoID)
+	}
+
+	syncedLyrics, err := h.ytClient.GetSyncedLyrics(r.Context(), videoID)
+	if err != nil {
+		var nfe *ytmusic.NotFoundError
+		if errors.As(err, &nfe) {
+			if dbErr := h.db.InsertYTNotFound(videoID); dbErr != nil {
+				slog.Error("db insert yt not-found failed", "err", dbErr, "videoId", videoID)
+			}
+			writeJSON(w, http.StatusNotFound, errorResponse{
+				Code:    404,
+				Name:    "TrackNotFound",
+				Message: "Failed to find specified track",
+			})
+			return
+		}
+		slog.Error("yt upstream request failed", "err", err, "videoId", videoID)
+		writeJSON(w, http.StatusBadGateway, errorResponse{
+			Code:    502,
+			Name:    "UpstreamError",
+			Message: "upstream request failed",
+		})
+		return
+	}
+
+	if dbErr := h.db.InsertYTHit(videoID, &syncedLyrics); dbErr != nil {
+		slog.Error("db insert yt hit failed", "err", dbErr, "videoId", videoID)
+	}
+
+	slog.Info("cached new yt track", "videoId", videoID)
+	writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: &syncedLyrics})
+}
+
+func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, artistName, trackName, albumName string, duration int, force bool) {
+	var entry *db.CacheEntry
+	var err error
 	if !force {
 		entry, err = h.db.Lookup(artistName, trackName, albumName, duration)
 		if err != nil {
