@@ -48,7 +48,9 @@ GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Ba
 
 All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`) are required.
 
-When metadata parameters are passed, the proxy searches YouTube Music first for a matching track and attempts to fetch synced lyrics. If YouTube Music returns no lyrics or fails, it automatically falls back to LRCLIB.
+When metadata parameters are passed, the proxy first checks the local SQLite cache. On a cache miss (or with `force=true`), the proxy resolves whether the song is an Asian track (such as Chinese Mandopop/Cantopop, Korean K-Pop, Japanese J-Pop) that has English metadata (e.g. from an Apple Music US or Malaysia storefront) via the iTunes Search API. If so, it looks up the original localized metadata from the regional storefront (e.g., `田馥甄` / `靜脈` instead of `Hebe Tien` / `Deep in the Veins`, or `방탄소년단` / `봄날` instead of `BTS` / `Spring Day`).
+
+The proxy then searches YouTube Music using the resolved original metadata and attempts to fetch synced lyrics. If YouTube Music returns no lyrics or fails, it automatically falls back to LRCLIB.
 
 **Optional parameter (supported on both):**
 
@@ -77,10 +79,11 @@ When metadata parameters are passed, the proxy searches YouTube Music first for 
 **502** — upstream request failed (network error or 5xx). Not cached; the next request will retry.
 
 **Fallback sequence:**
-1. **YouTube Music Search**: Searches YouTube Music using track metadata and ranks candidate video IDs by title, artist, album, and duration similarity. If a matching video ID with synced lyrics is found, it is returned and cached in SQLite under `(artist_name, track_name, album_name, duration)`.
-2. **LRCLIB Lookup**: If YouTube Music returns no lyrics or fails, the proxy queries LRCLIB `/api/get`.
-3. **LRCLIB Search Fallback**: If LRCLIB `/api/get` returns 404, it retries via LRCLIB `/api/search` for a track with synced lyrics within ±2 seconds duration.
-4. If a match is found from either provider, it is cached in SQLite as a hit (200); otherwise the 404 is cached normally.
+1. **Metadata Resolution (iTunes API)**: Checks iTunes Search API with the track name and artist. If the genre indicates a localized Asian genre (Mandopop, Cantopop, K-Pop, J-Pop), fetches the original native title and artist from the target storefront (default: `TW` for Mandopop, `HK` for Cantopop, `KR` for K-Pop, `JP` for J-Pop).
+2. **YouTube Music Search**: Searches YouTube Music using the resolved track metadata and ranks candidate video IDs by title, artist, album, and duration similarity. If a matching video ID with synced lyrics is found, it is returned and cached in SQLite under both the requested metadata and the resolved metadata.
+3. **LRCLIB Lookup**: If YouTube Music returns no lyrics or fails, the proxy queries LRCLIB `/api/get` with resolved metadata.
+4. **LRCLIB Search Fallback**: If LRCLIB `/api/get` returns 404, it retries via LRCLIB `/api/search` for a track with synced lyrics within ±2 seconds duration.
+5. If a match is found from either provider, it is cached in SQLite as a hit (200); otherwise the 404 is cached normally.
 
 ---
 
@@ -158,14 +161,20 @@ Paginated list of tracks that returned 404, newest first. Includes `retryAfter` 
 
 All options are set via environment variables.
 
-| Variable             | Default              | Description                                                                                         |
-| -------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
-| `HOST_PORT`          | `3000`               | Host port Docker binds on — change this to expose on a different port (e.g. `9876`)                 |
-| `PORT`               | `3000`               | Port the binary listens on **inside** the container — only needed if you change the `ports` mapping |
+| Variable                  | Default              | Description                                                                                         |
+| ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `HOST_PORT`               | `3000`               | Host port Docker binds on — change this to expose on a different port (e.g. `9876`)                 |
+| `PORT`                    | `3000`               | Port the binary listens on **inside** the container — only needed if you change the `ports` mapping |
 | `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file                                                                    |
 | `LRCLIB_BASE_URL`    | `https://lrclib.net` | Base URL of the upstream lrclib instance                                                            |
 | `NOT_FOUND_TTL_DAYS` | `7`                  | Days to serve a cached 404 before re-checking upstream                                              |
 | `ALLOWED_ORIGINS`    | _(empty)_            | Comma-separated extra CORS origins beyond `http://localhost:*` (e.g. `https://example.com`)         |
+| `ITUNES_RESOLVE_ENABLED`  | `true`               | Enable iTunes metadata resolution for Asian tracks with English names                               |
+| `ITUNES_STOREFRONT`       | `MY`                 | Initial iTunes storefront to query for track genre (e.g. `MY`, `US`)                                |
+| `ITUNES_MANDOPOP_COUNTRY` | `TW`                 | Target storefront for Mandopop/Chinese tracks (`TW` for Traditional Chinese, `CN` for Simplified)   |
+| `ITUNES_CANTOPOP_COUNTRY` | `HK`                 | Target storefront for Cantopop tracks                                                               |
+| `ITUNES_KPOP_COUNTRY`     | `KR`                 | Target storefront for K-Pop tracks                                                                 |
+| `ITUNES_JPOP_COUNTRY`     | `JP`                 | Target storefront for J-Pop tracks                                                                 |
 
 Copy `.env.example` to `.env` and edit as needed, then pass it to Compose:
 
@@ -180,8 +189,8 @@ env_file: .env
 | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Track cached (200)            | Returned from SQLite immediately — upstream never called                                                |
 | Track cached (404), age < TTL | 404 returned immediately — upstream never called                                                        |
-| Track cached (404), age ≥ TTL | Re-queried from upstream (YouTube Music search first, then LRCLIB); record updated                       |
-| Track not in cache            | Searched on YouTube Music first, fallback to LRCLIB + search fallback; result cached (200 or 404) in DB |
+| Track cached (404), age ≥ TTL | Re-queried from upstream (iTunes resolution -> YouTube Music search -> LRCLIB); record updated           |
+| Track not in cache            | Resolved via iTunes, searched on YouTube Music, fallback to LRCLIB; result cached (200 or 404) in DB    |
 | `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                                        |
 | Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                                        |
 
@@ -202,6 +211,9 @@ DB_PATH=./lyrics.db ./lrclib-cache-proxy
 .
 ├── main.go             # Entry point — config, router, graceful shutdown
 ├── db/db.go            # SQLite layer — schema, upserts, paginated queries
+├── itunes/
+│   ├── client.go       # iTunes Search & Lookup API client, genre detection, localization
+│   └── client_test.go  # Unit tests for iTunes client
 ├── lrclib/client.go    # Upstream LRCLIB HTTP client
 ├── ytmusic/
 │   ├── client.go       # YouTube Music client struct, constructor, shared types
@@ -209,7 +221,7 @@ DB_PATH=./lyrics.db ./lrclib-cache-proxy
 │   ├── next.go         # Next API (/youtubei/v1/next) & browseId lookup
 │   └── browse.go       # Browse API (/youtubei/v1/browse) & synced lyrics fetching
 ├── handler/
-│   ├── proxy.go        # GET /api/get — cache logic for YouTube Music and LRCLIB
+│   ├── proxy.go        # GET /api/get — cache logic, iTunes resolution, YouTube Music & LRCLIB
 │   └── admin.go        # GET /admin/* — stats and list endpoints
 ├── Dockerfile          # Multi-stage build: golang:1.25-alpine → alpine:3.21
 └── docker-compose.yml

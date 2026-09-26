@@ -17,6 +17,7 @@ import (
 
 	"github.com/limhenry/lrclib-cache-proxy/db"
 	"github.com/limhenry/lrclib-cache-proxy/handler"
+	"github.com/limhenry/lrclib-cache-proxy/itunes"
 	"github.com/limhenry/lrclib-cache-proxy/lrclib"
 	"github.com/limhenry/lrclib-cache-proxy/ytmusic"
 )
@@ -93,9 +94,33 @@ func main() {
 	defer database.Close()
 	slog.Info("database ready", "path", dbPath)
 
+	itunesResolveEnabled := getEnv("ITUNES_RESOLVE_ENABLED", "true") == "true"
+	itunesStorefront := getEnv("ITUNES_STOREFRONT", "MY")
+	itunesMandopopCountry := getEnv("ITUNES_MANDOPOP_COUNTRY", "TW")
+	itunesCantopopCountry := getEnv("ITUNES_CANTOPOP_COUNTRY", "HK")
+	itunesKpopCountry := getEnv("ITUNES_KPOP_COUNTRY", "KR")
+	itunesJpopCountry := getEnv("ITUNES_JPOP_COUNTRY", "JP")
+
+	var itunesClient *itunes.Client
+	if itunesResolveEnabled {
+		itunesClient = itunes.NewClient(itunes.Config{
+			DefaultCountry:  itunesStorefront,
+			MandopopCountry: itunesMandopopCountry,
+			CantopopCountry: itunesCantopopCountry,
+			KpopCountry:     itunesKpopCountry,
+			JpopCountry:     itunesJpopCountry,
+		})
+		slog.Info("itunes metadata resolution enabled",
+			"storefront", itunesStorefront,
+			"mandopop", itunesMandopopCountry,
+			"cantopop", itunesCantopopCountry,
+			"kpop", itunesKpopCountry,
+			"jpop", itunesJpopCountry)
+	}
+
 	client := lrclib.NewClient(lrclibBaseURL)
 	ytClient := ytmusic.NewClient()
-	proxyH := handler.NewProxyHandler(database, client, ytClient, notFoundTTLDays)
+	proxyH := handler.NewProxyHandler(database, client, ytClient, itunesClient, notFoundTTLDays)
 	adminH := handler.NewAdminHandler(database, notFoundTTLDays)
 
 	r := chi.NewRouter()
