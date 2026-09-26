@@ -87,7 +87,18 @@ The proxy then searches YouTube Music using the resolved original metadata and a
 
 ---
 
-### Admin endpoints
+### Admin web interface & endpoints
+
+#### Web Interface: `GET /admin` or `GET /admin/`
+
+Open `http://localhost:3000/admin` in any browser to access the lightweight, built-in management interface:
+- **Zero framework / zero external assets**: Single self-contained HTML/CSS/JS page embedded directly in the binary (~25 KB) with practically 0 MB idle RAM overhead.
+- **Cache Dashboard**: Real-time stats for cached tracks, negative-cache 404s, database file size, and timestamps.
+- **Browse & Search**: Paginated table of cached tracks with live search filtering across track names, artists, albums, or YouTube video IDs.
+- **Lyrics Inspector & Editor**: View formatted synced lyrics with timecode pills, one-click copy to clipboard, in-place lyrics editor, and instrumental toggle.
+- **Cache Eviction & Upstream Refresh**: Delete cached entries or trigger immediate force re-fetch from upstream (`force=true`).
+- **404 Management**: View negative cache retry-after timers, retry individual tracks, or flush all 404s in one click.
+- **Quick Lookup Tool**: Test queries or fetch songs directly via metadata or YouTube video ID.
 
 #### `GET /admin/summary`
 
@@ -103,9 +114,9 @@ Overall cache stats.
 }
 ```
 
-#### `GET /admin/songs?page=1&limit=50`
+#### `GET /admin/songs?page=1&limit=50&q=query`
 
-Paginated list of successfully cached tracks, newest first.
+Paginated list of successfully cached tracks, newest first. Supports optional keyword search (`q`).
 
 ```json
 {
@@ -114,23 +125,31 @@ Paginated list of successfully cached tracks, newest first.
   "total": 1042,
   "data": [
     {
+      "id": 1,
+      "source": "lrclib",
       "artistName": "borislav slavov",
       "trackName": "i want to live",
       "albumName": "baldur's gate 3 (original game soundtrack)",
       "duration": 233,
+      "hasLyrics": true,
+      "instrumental": false,
       "cachedAt": "2026-05-30T09:41:00Z"
     },
     {
+      "id": 12,
+      "source": "yt",
       "videoId": "B7kKeTRV0Xs",
+      "hasLyrics": true,
+      "instrumental": false,
       "cachedAt": "2026-05-30T09:30:00Z"
     }
   ]
 }
 ```
 
-#### `GET /admin/not-found?page=1&limit=50`
+#### `GET /admin/not-found?page=1&limit=50&q=query`
 
-Paginated list of tracks that returned 404, newest first. Includes `retryAfter` so you can see when the proxy will re-check the upstream provider.
+Paginated list of tracks that returned 404, newest first. Supports optional keyword search (`q`). Includes `retryAfter` so you can see when the proxy will re-check the upstream provider.
 
 ```json
 {
@@ -139,23 +158,41 @@ Paginated list of tracks that returned 404, newest first. Includes `retryAfter` 
   "total": 37,
   "data": [
     {
+      "id": 4,
+      "source": "lrclib",
       "artistName": "some artist",
       "trackName": "unreleased track",
       "albumName": "demo",
       "duration": 180,
       "notFoundAt": "2026-05-30T09:00:00Z",
       "retryAfter": "2026-06-06T09:00:00Z"
-    },
-    {
-      "videoId": "invalid_id",
-      "notFoundAt": "2026-05-30T08:00:00Z",
-      "retryAfter": "2026-06-06T08:00:00Z"
     }
   ]
 }
 ```
 
-`limit` is capped at 500 per page.
+#### `GET /admin/entry?source=lrclib|yt&id=123`
+
+Fetches detailed cache entry including full `syncedLyrics` content and `instrumental` flag.
+
+#### `DELETE /admin/entry?source=lrclib|yt&id=123`
+
+Deletes a cached track or 404 record from the database.
+
+#### `PUT /admin/entry?source=lrclib|yt&id=123`
+
+Updates `syncedLyrics` and/or `instrumental` status for an entry.
+
+```json
+{
+  "syncedLyrics": "[00:01.00] Custom lyrics line\n...",
+  "instrumental": false
+}
+```
+
+#### `POST /admin/not-found/clear`
+
+Flushes all 404 negative-cache records across both LRCLIB and YouTube tables.
 
 ## Configuration
 

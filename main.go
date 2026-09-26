@@ -131,11 +131,15 @@ func main() {
 
 	r.Get("/api/get", proxyH.ServeHTTP)
 
-	r.Route("/admin", func(r chi.Router) {
-		r.Get("/summary", adminH.Summary)
-		r.Get("/songs", adminH.Songs)
-		r.Get("/not-found", adminH.NotFound)
-	})
+	r.Get("/admin", adminH.UI)
+	r.Get("/admin/", adminH.UI)
+	r.Get("/admin/summary", adminH.Summary)
+	r.Get("/admin/songs", adminH.Songs)
+	r.Get("/admin/not-found", adminH.NotFound)
+	r.Get("/admin/entry", adminH.GetEntry)
+	r.Delete("/admin/entry", adminH.DeleteEntry)
+	r.Put("/admin/entry", adminH.UpdateEntry)
+	r.Post("/admin/not-found/clear", adminH.ClearNotFound)
 
 	srv := &http.Server{
 		Addr:         ":" + port,
