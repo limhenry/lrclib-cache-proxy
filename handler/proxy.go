@@ -10,25 +10,28 @@ import (
 	"time"
 
 	"github.com/limhenry/lrclib-cache-proxy/db"
+	"github.com/limhenry/lrclib-cache-proxy/itunes"
 	"github.com/limhenry/lrclib-cache-proxy/lrclib"
 	"github.com/limhenry/lrclib-cache-proxy/ytmusic"
 )
 
 // ProxyHandler handles GET /api/get with local caching for LRCLIB and YouTube Music.
 type ProxyHandler struct {
-	db          *db.DB
-	client      *lrclib.Client
-	ytClient    *ytmusic.Client
-	notFoundTTL time.Duration
+	db           *db.DB
+	client       *lrclib.Client
+	ytClient     *ytmusic.Client
+	itunesClient *itunes.Client
+	notFoundTTL  time.Duration
 }
 
 // NewProxyHandler creates a ProxyHandler.
-func NewProxyHandler(database *db.DB, client *lrclib.Client, ytClient *ytmusic.Client, notFoundTTLDays int) *ProxyHandler {
+func NewProxyHandler(database *db.DB, client *lrclib.Client, ytClient *ytmusic.Client, itunesClient *itunes.Client, notFoundTTLDays int) *ProxyHandler {
 	return &ProxyHandler{
-		db:          database,
-		client:      client,
-		ytClient:    ytClient,
-		notFoundTTL: time.Duration(notFoundTTLDays) * 24 * time.Hour,
+		db:           database,
+		client:       client,
+		ytClient:     ytClient,
+		itunesClient: itunesClient,
+		notFoundTTL:  time.Duration(notFoundTTLDays) * 24 * time.Hour,
 	}
 }
 
@@ -178,51 +181,115 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 		slog.Info("404 TTL expired, re-querying upstream", "track", trackName, "artist", artistName)
 	}
 
-	// Cache miss or expired 404 — try YouTube Music first.
-	videoID, ytErr := h.ytClient.GetVideoID(r.Context(), trackName, artistName, albumName, duration)
+	// Cache miss or expired 404 — resolve localized metadata if applicable.
+	searchArtist := artistName
+	searchTrack := trackName
+	searchAlbum := albumName
+	var isResolved bool
+
+	if h.itunesClient != nil {
+		resolved, err := h.itunesClient.ResolveMetadata(r.Context(), artistName, trackName, albumName, duration)
+		if err != nil {
+			slog.Warn("itunes metadata resolution failed, using original metadata", "err", err, "track", trackName)
+		} else if resolved != nil && resolved.Resolved {
+			slog.Info("resolved localized metadata via itunes",
+				"originalTrack", trackName, "resolvedTrack", resolved.TrackName,
+				"originalArtist", artistName, "resolvedArtist", resolved.ArtistName,
+				"genre", resolved.OriginalGenre, "country", resolved.TargetCountry)
+			searchArtist = resolved.ArtistName
+			searchTrack = resolved.TrackName
+			searchAlbum = resolved.AlbumName
+			isResolved = true
+		}
+	}
+
+	cacheHit := func(lyrics *string, instrumental bool) {
+		if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, lyrics, instrumental); dbErr != nil {
+			slog.Error("db insert hit failed", "err", dbErr)
+		}
+		if isResolved {
+			if dbErr := h.db.InsertHit(searchArtist, searchTrack, searchAlbum, duration, lyrics, instrumental); dbErr != nil {
+				slog.Error("db insert hit (resolved) failed", "err", dbErr)
+			}
+		}
+	}
+
+	cacheNotFound := func() {
+		if dbErr := h.db.InsertNotFound(artistName, trackName, albumName, duration); dbErr != nil {
+			slog.Error("db insert not-found failed", "err", dbErr)
+		}
+		if isResolved {
+			if dbErr := h.db.InsertNotFound(searchArtist, searchTrack, searchAlbum, duration); dbErr != nil {
+				slog.Error("db insert not-found (resolved) failed", "err", dbErr)
+			}
+		}
+	}
+
+	// Try YouTube Music first with resolved metadata.
+	videoID, ytErr := h.ytClient.GetVideoID(r.Context(), searchTrack, searchArtist, searchAlbum, duration)
+	if ytErr != nil && isResolved {
+		// Fallback to original metadata
+		videoID, ytErr = h.ytClient.GetVideoID(r.Context(), trackName, artistName, albumName, duration)
+	}
+
 	if ytErr != nil {
-		slog.Warn("ytmusic get video id failed, falling back to lrclib", "err", ytErr, "track", trackName)
+		slog.Warn("ytmusic get video id failed, falling back to lrclib", "err", ytErr, "track", searchTrack)
 	} else if videoID != "" {
 		syncedLyrics, lyricsErr := h.ytClient.GetSyncedLyrics(r.Context(), videoID)
 		if lyricsErr == nil && syncedLyrics != "" {
-			if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, &syncedLyrics, false); dbErr != nil {
-				slog.Error("db insert hit (ytmusic) failed", "err", dbErr)
-			}
+			cacheHit(&syncedLyrics, false)
 			if dbErr := h.db.InsertYTHit(videoID, &syncedLyrics); dbErr != nil {
 				slog.Error("db insert yt hit failed", "err", dbErr)
 			}
-			slog.Info("cached track via ytmusic", "track", trackName, "artist", artistName, "videoId", videoID)
+			slog.Info("cached track via ytmusic", "track", searchTrack, "artist", searchArtist, "videoId", videoID)
 			writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: &syncedLyrics})
 			return
 		}
-		slog.Info("ytmusic get lyrics failed or empty, falling back to lrclib", "err", lyricsErr, "track", trackName, "videoId", videoID)
+		slog.Info("ytmusic get lyrics failed or empty, falling back to lrclib", "err", lyricsErr, "track", searchTrack, "videoId", videoID)
 	}
 
-	// Fallback: call LRCLIB.
-	result, err := h.client.GetLyrics(r.Context(), artistName, trackName, albumName, duration)
+	// Fallback: call LRCLIB with resolved metadata.
+	result, err := h.client.GetLyrics(r.Context(), searchArtist, searchTrack, searchAlbum, duration)
 	if err != nil {
 		var nfe *lrclib.NotFoundError
 		if errors.As(err, &nfe) {
 			// Fallback: search by track name, pick the first result that has
 			// synced lyrics and a duration within ±2 s of the requested duration.
-			searchResult, searchErr := h.client.SearchLyrics(r.Context(), trackName, duration)
+			searchResult, searchErr := h.client.SearchLyrics(r.Context(), searchTrack, duration)
+			if (searchErr != nil || searchResult == nil) && isResolved {
+				// Retry search with original track name if resolved search yielded nothing
+				searchResult, searchErr = h.client.SearchLyrics(r.Context(), trackName, duration)
+			}
+
 			if searchErr != nil {
-				slog.Warn("search fallback failed", "err", searchErr, "track", trackName)
+				slog.Warn("search fallback failed", "err", searchErr, "track", searchTrack)
 			} else if searchResult != nil {
 				var syncedLyrics *string
 				if searchResult.SyncedLyrics != "" {
 					syncedLyrics = &searchResult.SyncedLyrics
 				}
-				if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, syncedLyrics, searchResult.Instrumental); dbErr != nil {
-					slog.Error("db insert hit (search fallback) failed", "err", dbErr)
-				}
-				slog.Info("cached track via search fallback", "track", trackName, "artist", artistName)
+				cacheHit(syncedLyrics, searchResult.Instrumental)
+				slog.Info("cached track via search fallback", "track", searchTrack, "artist", searchArtist)
 				writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
 				return
 			}
-			if dbErr := h.db.InsertNotFound(artistName, trackName, albumName, duration); dbErr != nil {
-				slog.Error("db insert not-found failed", "err", dbErr)
+
+			// If still not found and was resolved, try original metadata GetLyrics as last resort
+			if isResolved {
+				origResult, origErr := h.client.GetLyrics(r.Context(), artistName, trackName, albumName, duration)
+				if origErr == nil && origResult != nil {
+					var syncedLyrics *string
+					if origResult.SyncedLyrics != "" {
+						syncedLyrics = &origResult.SyncedLyrics
+					}
+					cacheHit(syncedLyrics, origResult.Instrumental)
+					slog.Info("cached track via original metadata lrclib", "track", trackName, "artist", artistName)
+					writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
+					return
+				}
 			}
+
+			cacheNotFound()
 			writeJSON(w, http.StatusNotFound, errorResponse{
 				Code:    404,
 				Name:    "TrackNotFound",
@@ -247,19 +314,16 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 
 	// /api/get returned 200 but no synced lyrics — try the search fallback.
 	if syncedLyrics == nil && !result.Instrumental {
-		searchResult, searchErr := h.client.SearchLyrics(r.Context(), trackName, duration)
+		searchResult, searchErr := h.client.SearchLyrics(r.Context(), searchTrack, duration)
 		if searchErr != nil {
-			slog.Warn("search fallback failed", "err", searchErr, "track", trackName)
+			slog.Warn("search fallback failed", "err", searchErr, "track", searchTrack)
 		} else if searchResult != nil && searchResult.SyncedLyrics != "" {
-			slog.Info("found synced lyrics via search fallback", "track", trackName, "artist", artistName)
+			slog.Info("found synced lyrics via search fallback", "track", searchTrack, "artist", searchArtist)
 			syncedLyrics = &searchResult.SyncedLyrics
 		}
 	}
 
-	if dbErr := h.db.InsertHit(artistName, trackName, albumName, duration, syncedLyrics, result.Instrumental); dbErr != nil {
-		slog.Error("db insert hit failed", "err", dbErr)
-	}
-
-	slog.Info("cached new track", "track", trackName, "artist", artistName)
+	cacheHit(syncedLyrics, result.Instrumental)
+	slog.Info("cached new track", "track", searchTrack, "artist", searchArtist)
 	writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
 }
