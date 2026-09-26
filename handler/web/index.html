@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyrics Cache Proxy - Admin</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-hover: #1f2937;
+      --surface-border: #374151;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-subtle: rgba(59, 130, 246, 0.15);
+      --success: #10b981;
+      --success-subtle: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-subtle: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --danger-subtle: rgba(239, 68, 68, 0.15);
+      --yt: #f43f5e;
+      --yt-subtle: rgba(244, 63, 94, 0.15);
+      --radius: 8px;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      font-size: 16px;
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      background: var(--surface-border);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: #4b5563;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger-subtle);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 0.25rem 0.55rem;
+      font-size: 0.78rem;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Summary Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--surface-border);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .badge-count {
+      background: var(--surface-border);
+      color: var(--text);
+    }
+
+    .badge-lrclib {
+      background: var(--primary-subtle);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .badge-yt {
+      background: var(--yt-subtle);
+      color: #fb7185;
+      border: 1px solid rgba(251, 113, 133, 0.3);
+    }
+
+    .badge-success {
+      background: var(--success-subtle);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warning {
+      background: var(--warning-subtle);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 0.35rem 0.75rem;
+      min-width: 280px;
+      flex: 1;
+      max-width: 450px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.88rem;
+      width: 100%;
+      outline: none;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    select.page-select {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    /* Data Table */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--surface-border);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.4);
+      font-size: 0.86rem;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface-hover);
+    }
+
+    .track-title {
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .track-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .cell-nowrap {
+      white-space: nowrap;
+    }
+
+    .cell-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 0.25rem;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-footer {
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .lyrics-view {
+      background: #060910;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .lrc-line {
+      display: flex;
+      gap: 0.75rem;
+      padding: 2px 0;
+    }
+
+    .lrc-time {
+      color: #60a5fa;
+      user-select: none;
+      font-weight: 500;
+    }
+
+    .lrc-text {
+      color: #e2e8f0;
+      flex: 1;
+    }
+
+    textarea.lyrics-edit {
+      width: 100%;
+      height: 340px;
+      background: #060910;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea.lyrics-edit:focus {
+      border-color: var(--primary);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .form-input {
+      background: #060910;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.88rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.86rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 2000;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      animation: slideIn 0.2s ease forwards;
+      pointer-events: auto;
+    }
+
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error { border-left: 4px solid var(--danger); }
+    .toast-info { border-left: 4px solid var(--primary); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      main { padding: 1rem; }
+      .controls-bar { flex-direction: column; align-items: stretch; }
+      .search-box { max-width: 100%; }
+      .modal { max-height: 96vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">L</div>
+      <div>
+        <h1>Lyrics Cache Proxy</h1>
+      </div>
+      <span class="brand-tag">Admin UI</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btn-refresh-stats">↻ Refresh</button>
+      <a href="/api/get" class="btn btn-sm" target="_blank">API Docs</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Summary Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Cached Hits (200)</span>
+        <span class="stat-value" id="stat-cached">-</span>
+        <span class="stat-sub">LRCLIB + YouTube</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Not Found (404)</span>
+        <span class="stat-value" id="stat-notfound">-</span>
+        <span class="stat-sub">Negative Cache</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Database Size</span>
+        <span class="stat-value" id="stat-dbsize">-</span>
+        <span class="stat-sub">SQLite WAL</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Latest Cached</span>
+        <span class="stat-value" id="stat-latest" style="font-size: 1.15rem; margin-top: 0.35rem;">-</span>
+        <span class="stat-sub" id="stat-oldest">Oldest: -</span>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="songs">
+        Cached Lyrics <span class="badge badge-count" id="badge-songs-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="notfound">
+        404 Cache <span class="badge badge-count" id="badge-notfound-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="lookup">
+        Quick Lookup
+      </button>
+    </nav>
+
+    <!-- Tab 1: Cached Songs -->
+    <section id="tab-songs">
+      <div class="controls-bar" style="margin-bottom: 1rem;">
+        <div class="search-box">
+          <input type="text" id="songs-search" placeholder="Search by track, artist, album, or video ID...">
+        </div>
+        <div class="pagination-bar">
+          <span>Rows:</span>
+          <select class="page-select" id="songs-limit">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn btn-sm" id="songs-prev" disabled>◀ Prev</button>
+          <span id="songs-page-info">Page 1</span>
+          <button class="btn btn-sm" id="songs-next" disabled>Next ▶</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Track & Artist / Video ID</th>
+              <th>Album</th>
+              <th>Duration</th>
+              <th>Lyrics</th>
+              <th>Cached At</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="songs-table-body">
+            <tr><td colspan="7" class="empty-state">Loading cached tracks...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 2: 404 Cache -->
+    <section id="tab-notfound" style="display: none;">
+      <div class="controls-bar" style="margin-bottom: 1rem;">
+        <div class="search-box">
+          <input type="text" id="notfound-search" placeholder="Search 404 records...">
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <button class="btn btn-danger btn-sm" id="btn-clear-404">Flush All 404s</button>
+          <div class="pagination-bar">
+            <span>Rows:</span>
+            <select class="page-select" id="notfound-limit">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+            <button class="btn btn-sm" id="notfound-prev" disabled>◀ Prev</button>
+            <span id="notfound-page-info">Page 1</span>
+            <button class="btn btn-sm" id="notfound-next" disabled>Next ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Track & Artist / Video ID</th>
+              <th>Album</th>
+              <th>Recorded 404</th>
+              <th>Retry After</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="notfound-table-body">
+            <tr><td colspan="6" class="empty-state">Loading 404 records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 3: Quick Lookup -->
+    <section id="tab-lookup" style="display: none;">
+      <div style="background: var(--surface); border: 1px solid var(--surface-border); border-radius: var(--radius); padding: 1.5rem; max-width: 650px;">
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600;">Manual Query / Cache Test</h2>
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">
+          <label class="checkbox-label">
+            <input type="radio" name="lookup-type" value="metadata" checked> Metadata (Track + Artist)
+          </label>
+          <label class="checkbox-label">
+            <input type="radio" name="lookup-type" value="yt"> YouTube Video ID
+          </label>
+        </div>
+
+        <form id="lookup-form" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div id="lookup-meta-fields" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Track Name *</label>
+              <input type="text" class="form-input" id="lookup-track" placeholder="e.g. I Want to Live">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Artist Name *</label>
+              <input type="text" class="form-input" id="lookup-artist" placeholder="e.g. Borislav Slavov">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Album Name *</label>
+              <input type="text" class="form-input" id="lookup-album" placeholder="e.g. Baldur's Gate 3 OST">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration (seconds) *</label>
+              <input type="number" class="form-input" id="lookup-duration" placeholder="e.g. 233">
+            </div>
+          </div>
+
+          <div id="lookup-yt-fields" style="display: none; flex-direction: column; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">YouTube Video ID *</label>
+              <input type="text" class="form-input" id="lookup-videoid" placeholder="e.g. B7kKeTRV0Xs">
+            </div>
+          </div>
+
+          <label class="checkbox-label" style="margin-top: 0.25rem;">
+            <input type="checkbox" id="lookup-force"> Bypass Cache (force=true)
+          </label>
+
+          <button type="submit" class="btn btn-primary" style="align-self: flex-start; margin-top: 0.5rem;" id="btn-run-lookup">
+            Fetch Lyrics
+          </button>
+        </form>
+
+        <div id="lookup-result-box" style="display: none; margin-top: 1.5rem;">
+          <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;" id="lookup-result-title">Response:</div>
+          <pre class="lyrics-view" id="lookup-result-body" style="max-height: 250px;"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lyrics View / Edit Modal -->
+  <div class="modal-overlay" id="lyrics-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-song-title">Lyrics Inspector</div>
+          <div class="track-sub" id="modal-song-sub">-</div>
+        </div>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-sm btn-primary" id="modal-mode-view">Synced View</button>
+            <button class="btn btn-sm" id="modal-mode-edit">Raw Editor</button>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <label class="checkbox-label" id="modal-instrumental-label">
+              <input type="checkbox" id="modal-instrumental-check"> Instrumental
+            </label>
+            <button class="btn btn-sm" id="modal-copy-lrc">Copy LRC</button>
+          </div>
+        </div>
+
+        <div id="modal-view-container" class="lyrics-view">
+          <div class="empty-state">No lyrics loaded</div>
+        </div>
+
+        <div id="modal-edit-container" style="display: none;">
+          <textarea class="lyrics-edit" id="modal-edit-textarea" placeholder="Paste or edit LRC lyrics here..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" id="modal-cancel-btn">Close</button>
+        <button class="btn btn-primary" id="modal-save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    // State
+    const state = {
+      activeTab: 'songs',
+      songsPage: 1,
+      songsLimit: 50,
+      songsQuery: '',
+      songsTotal: 0,
+      notfoundPage: 1,
+      notfoundLimit: 50,
+      notfoundQuery: '',
+      notfoundTotal: 0,
+      currentModalEntry: null,
+      currentModalMode: 'view'
+    };
+
+    // DOM Elements
+    const elements = {
+      statCached: document.getElementById('stat-cached'),
+      statNotFound: document.getElementById('stat-notfound'),
+      statDBSize: document.getElementById('stat-dbsize'),
+      statLatest: document.getElementById('stat-latest'),
+      statOldest: document.getElementById('stat-oldest'),
+      badgeSongs: document.getElementById('badge-songs-count'),
+      badgeNotFound: document.getElementById('badge-notfound-count'),
+      btnRefreshStats: document.getElementById('btn-refresh-stats'),
+      tabSongs: document.getElementById('tab-songs'),
+      tabNotFound: document.getElementById('tab-notfound'),
+      tabLookup: document.getElementById('tab-lookup'),
+      songsTable: document.getElementById('songs-table-body'),
+      songsSearch: document.getElementById('songs-search'),
+      songsLimit: document.getElementById('songs-limit'),
+      songsPrev: document.getElementById('songs-prev'),
+      songsNext: document.getElementById('songs-next'),
+      songsPageInfo: document.getElementById('songs-page-info'),
+      notfoundTable: document.getElementById('notfound-table-body'),
+      notfoundSearch: document.getElementById('notfound-search'),
+      notfoundLimit: document.getElementById('notfound-limit'),
+      notfoundPrev: document.getElementById('notfound-prev'),
+      notfoundNext: document.getElementById('notfound-next'),
+      notfoundPageInfo: document.getElementById('notfound-page-info'),
+      btnClear404: document.getElementById('btn-clear-404'),
+      modal: document.getElementById('lyrics-modal'),
+      modalTitle: document.getElementById('modal-song-title'),
+      modalSub: document.getElementById('modal-song-sub'),
+      modalView: document.getElementById('modal-view-container'),
+      modalEdit: document.getElementById('modal-edit-container'),
+      modalTextarea: document.getElementById('modal-edit-textarea'),
+      modalInstrumental: document.getElementById('modal-instrumental-check'),
+      modalModeView: document.getElementById('modal-mode-view'),
+      modalModeEdit: document.getElementById('modal-mode-edit'),
+      modalSave: document.getElementById('modal-save-btn'),
+      modalClose: document.getElementById('modal-close-btn'),
+      modalCancel: document.getElementById('modal-cancel-btn'),
+      modalCopy: document.getElementById('modal-copy-lrc'),
+      toasts: document.getElementById('toasts')
+    };
+
+    // Toast helper
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      elements.toasts.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Formatters
+    function formatDuration(sec) {
+      if (!sec || sec <= 0) return '-';
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function formatTime(isoStr) {
+      if (!isoStr) return '-';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString(undefined, {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Fetch Summary
+    async function loadSummary() {
+      try {
+        const res = await fetch('/admin/summary');
+        if (!res.ok) throw new Error('Failed to load summary');
+        const data = await res.json();
+        elements.statCached.textContent = (data.cachedCount || 0).toLocaleString();
+        elements.statNotFound.textContent = (data.notFoundCount || 0).toLocaleString();
+        elements.statDBSize.textContent = `${(data.dbSizeMB || 0).toFixed(2)} MB`;
+        elements.badgeSongs.textContent = data.cachedCount || 0;
+        elements.badgeNotFound.textContent = data.notFoundCount || 0;
+        if (data.newestCachedAt) {
+          elements.statLatest.textContent = formatTime(data.newestCachedAt);
+        } else {
+          elements.statLatest.textContent = 'None';
+        }
+        if (data.oldestCachedAt) {
+          elements.statOldest.textContent = `Oldest: ${formatTime(data.oldestCachedAt)}`;
+        } else {
+          elements.statOldest.textContent = 'Oldest: None';
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to fetch summary stats', 'error');
+      }
+    }
+
+    // Fetch Cached Songs
+    async function loadSongs() {
+      elements.songsTable.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      try {
+        const q = encodeURIComponent(state.songsQuery);
+        const res = await fetch(`/admin/songs?page=${state.songsPage}&limit=${state.songsLimit}&q=${q}`);
+        if (!res.ok) throw new Error('Failed to fetch songs');
+        const json = await res.json();
+        state.songsTotal = json.total || 0;
+        renderSongs(json.data || []);
+        updateSongsPagination();
+      } catch (err) {
+        console.error(err);
+        elements.songsTable.innerHTML = '<tr><td colspan="7" class="empty-state" style="color:var(--danger)">Error loading songs</td></tr>';
+      }
+    }
+
+    function renderSongs(songs) {
+      if (!songs || songs.length === 0) {
+        elements.songsTable.innerHTML = '<tr><td colspan="7" class="empty-state">No cached songs found.</td></tr>';
+        return;
+      }
+      elements.songsTable.innerHTML = songs.map(s => {
+        const isYT = s.source === 'yt' || (!s.artistName && s.videoId);
+        const sourceBadge = isYT 
+          ? '<span class="badge badge-yt">YouTube</span>' 
+          : '<span class="badge badge-lrclib">LRCLIB</span>';
+        
+        const title = isYT ? (s.videoId) : escapeHtml(s.trackName || '-');
+        const artist = isYT ? 'YouTube Video ID' : escapeHtml(s.artistName || '-');
+        const album = isYT ? '-' : escapeHtml(s.albumName || '-');
+        const dur = formatDuration(s.duration);
+        
+        let lyricsBadge = '<span class="badge" style="background:#374151;color:#9ca3af;">Empty</span>';
+        if (s.instrumental) {
+          lyricsBadge = '<span class="badge badge-warning">Instrumental</span>';
+        } else if (s.hasLyrics) {
+          lyricsBadge = '<span class="badge badge-success">Synced LRC</span>';
+        }
+
+        return `
+          <tr>
+            <td>${sourceBadge}</td>
+            <td>
+              <div class="track-title">${title}</div>
+              <div class="track-sub">${artist}</div>
+            </td>
+            <td>${album}</td>
+            <td class="cell-nowrap">${dur}</td>
+            <td>${lyricsBadge}</td>
+            <td class="cell-nowrap" style="color:var(--text-muted);font-size:0.8rem;">${formatTime(s.cachedAt)}</td>
+            <td style="text-align: right;">
+              <div class="cell-actions" style="justify-content: flex-end;">
+                <button class="btn btn-sm" onclick="openLyricsModal('${s.source}', ${s.id})">View</button>
+                <button class="btn btn-sm" onclick="refetchEntry('${s.source}', ${JSON.stringify(s).replace(/"/g, '&quot;')})">Re-fetch</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteEntry('${s.source}', ${s.id})">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateSongsPagination() {
+      const maxPages = Math.max(1, Math.ceil(state.songsTotal / state.songsLimit));
+      elements.songsPageInfo.textContent = `Page ${state.songsPage} of ${maxPages} (${state.songsTotal} total)`;
+      elements.songsPrev.disabled = state.songsPage <= 1;
+      elements.songsNext.disabled = state.songsPage >= maxPages;
+    }
+
+    // Fetch 404s
+    async function loadNotFound() {
+      elements.notfoundTable.innerHTML = '<tr><td colspan="6" class="empty-state">Loading...</td></tr>';
+      try {
+        const q = encodeURIComponent(state.notfoundQuery);
+        const res = await fetch(`/admin/not-found?page=${state.notfoundPage}&limit=${state.notfoundLimit}&q=${q}`);
+        if (!res.ok) throw new Error('Failed to fetch 404s');
+        const json = await res.json();
+        state.notfoundTotal = json.total || 0;
+        renderNotFound(json.data || []);
+        updateNotFoundPagination();
+      } catch (err) {
+        console.error(err);
+        elements.notfoundTable.innerHTML = '<tr><td colspan="6" class="empty-state" style="color:var(--danger)">Error loading 404 records</td></tr>';
+      }
+    }
+
+    function renderNotFound(entries) {
+      if (!entries || entries.length === 0) {
+        elements.notfoundTable.innerHTML = '<tr><td colspan="6" class="empty-state">No 404 records in cache.</td></tr>';
+        return;
+      }
+      elements.notfoundTable.innerHTML = entries.map(e => {
+        const isYT = e.source === 'yt' || (!e.artistName && e.videoId);
+        const sourceBadge = isYT 
+          ? '<span class="badge badge-yt">YouTube</span>' 
+          : '<span class="badge badge-lrclib">LRCLIB</span>';
+        
+        const title = isYT ? (e.videoId) : escapeHtml(e.trackName || '-');
+        const artist = isYT ? 'YouTube Video ID' : escapeHtml(e.artistName || '-');
+        const album = isYT ? '-' : escapeHtml(e.albumName || '-');
+
+        return `
+          <tr>
+            <td>${sourceBadge}</td>
+            <td>
+              <div class="track-title">${title}</div>
+              <div class="track-sub">${artist}</div>
+            </td>
+            <td>${album}</td>
+            <td class="cell-nowrap" style="color:var(--text-muted);font-size:0.8rem;">${formatTime(e.notFoundAt)}</td>
+            <td class="cell-nowrap" style="font-size:0.8rem;">
+              <span style="color:var(--warning)">${formatTime(e.retryAfter)}</span>
+            </td>
+            <td style="text-align: right;">
+              <div class="cell-actions" style="justify-content: flex-end;">
+                <button class="btn btn-sm" onclick="refetchEntry('${e.source}', ${JSON.stringify(e).replace(/"/g, '&quot;')})">Retry Now</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteEntry('${e.source}', ${e.id})">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateNotFoundPagination() {
+      const maxPages = Math.max(1, Math.ceil(state.notfoundTotal / state.notfoundLimit));
+      elements.notfoundPageInfo.textContent = `Page ${state.notfoundPage} of ${maxPages} (${state.notfoundTotal} total)`;
+      elements.notfoundPrev.disabled = state.notfoundPage <= 1;
+      elements.notfoundNext.disabled = state.notfoundPage >= maxPages;
+    }
+
+    // Tab Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        state.activeTab = tab;
+        elements.tabSongs.style.display = tab === 'songs' ? 'block' : 'none';
+        elements.tabNotFound.style.display = tab === 'notfound' ? 'block' : 'none';
+        elements.tabLookup.style.display = tab === 'lookup' ? 'block' : 'none';
+
+        if (tab === 'songs') loadSongs();
+        if (tab === 'notfound') loadNotFound();
+      });
+    });
+
+    // Search & Pagination Handlers
+    let searchDebounceTimer = null;
+    elements.songsSearch.addEventListener('input', (e) => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        state.songsQuery = e.target.value;
+        state.songsPage = 1;
+        loadSongs();
+      }, 300);
+    });
+
+    elements.songsLimit.addEventListener('change', (e) => {
+      state.songsLimit = parseInt(e.target.value, 10);
+      state.songsPage = 1;
+      loadSongs();
+    });
+
+    elements.songsPrev.addEventListener('click', () => {
+      if (state.songsPage > 1) {
+        state.songsPage--;
+        loadSongs();
+      }
+    });
+
+    elements.songsNext.addEventListener('click', () => {
+      state.songsPage++;
+      loadSongs();
+    });
+
+    elements.notfoundSearch.addEventListener('input', (e) => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        state.notfoundQuery = e.target.value;
+        state.notfoundPage = 1;
+        loadNotFound();
+      }, 300);
+    });
+
+    elements.notfoundLimit.addEventListener('change', (e) => {
+      state.notfoundLimit = parseInt(e.target.value, 10);
+      state.notfoundPage = 1;
+      loadNotFound();
+    });
+
+    elements.notfoundPrev.addEventListener('click', () => {
+      if (state.notfoundPage > 1) {
+        state.notfoundPage--;
+        loadNotFound();
+      }
+    });
+
+    elements.notfoundNext.addEventListener('click', () => {
+      state.notfoundPage++;
+      loadNotFound();
+    });
+
+    // Clear All 404s
+    elements.btnClear404.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to flush all 404 records? This allows upstream to be re-queried immediately for all previously missing songs.')) {
+        return;
+      }
+      try {
+        const res = await fetch('/admin/not-found/clear', { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to clear 404s');
+        showToast('Flushed all 404 negative cache records', 'success');
+        loadSummary();
+        loadNotFound();
+      } catch (err) {
+        console.error(err);
+        showToast('Error clearing 404s', 'error');
+      }
+    });
+
+    // Actions: Delete
+    async function deleteEntry(source, id) {
+      if (!confirm('Are you sure you want to delete this cached record?')) return;
+      try {
+        const res = await fetch(`/admin/entry?source=${encodeURIComponent(source)}&id=${id}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) throw new Error('Failed to delete entry');
+        showToast('Record deleted from cache', 'success');
+        loadSummary();
+        if (state.activeTab === 'songs') loadSongs();
+        if (state.activeTab === 'notfound') loadNotFound();
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to delete entry', 'error');
+      }
+    }
+
+    // Actions: Re-fetch
+    async function refetchEntry(source, item) {
+      showToast('Re-fetching from upstream...', 'info');
+      try {
+        let url = '/api/get?force=true&';
+        if (source === 'yt' || item.videoId) {
+          url += `videoId=${encodeURIComponent(item.videoId)}`;
+        } else {
+          url += `artist_name=${encodeURIComponent(item.artistName)}&track_name=${encodeURIComponent(item.trackName)}&album_name=${encodeURIComponent(item.albumName)}&duration=${item.duration}`;
+        }
+        const res = await fetch(url);
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Lyrics fetched and cache refreshed!', 'success');
+        } else if (res.status === 404) {
+          showToast('Track still not found upstream (404 refreshed)', 'warning');
+        } else {
+          showToast(`Error: ${data.message || 'Upstream error'}`, 'error');
+        }
+        loadSummary();
+        if (state.activeTab === 'songs') loadSongs();
+        if (state.activeTab === 'notfound') loadNotFound();
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to contact proxy API', 'error');
+      }
+    }
+
+    // Modal & Lyrics View
+    async function openLyricsModal(source, id) {
+      try {
+        const res = await fetch(`/admin/entry?source=${encodeURIComponent(source)}&id=${id}`);
+        if (!res.ok) throw new Error('Failed to load entry details');
+        const entry = await res.json();
+        state.currentModalEntry = entry;
+
+        if (entry.source === 'yt') {
+          elements.modalTitle.textContent = `YouTube: ${entry.videoId}`;
+          elements.modalSub.textContent = `Cached: ${formatTime(entry.cachedAt)}`;
+        } else {
+          elements.modalTitle.textContent = entry.trackName || 'Unknown Track';
+          elements.modalSub.textContent = `${entry.artistName || 'Unknown Artist'} • ${entry.albumName || 'Unknown Album'} (${formatDuration(entry.duration)})`;
+        }
+
+        elements.modalInstrumental.checked = !!entry.instrumental;
+        elements.modalTextarea.value = entry.syncedLyrics || '';
+
+        setModalMode('view');
+        renderLyricsView(entry.syncedLyrics, entry.instrumental);
+        elements.modal.classList.add('open');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to load lyrics details', 'error');
+      }
+    }
+
+    function renderLyricsView(lrc, instrumental) {
+      if (instrumental) {
+        elements.modalView.innerHTML = '<div class="empty-state" style="color:var(--warning)">This track is marked as Instrumental (no lyrics).</div>';
+        return;
+      }
+      if (!lrc || lrc.trim() === '') {
+        elements.modalView.innerHTML = '<div class="empty-state">No lyrics text found in cache.</div>';
+        return;
+      }
+
+      const lines = lrc.split('\n');
+      elements.modalView.innerHTML = lines.map(line => {
+        const match = line.match(/^(\[\d+:\d+(?:\.\d+)?\])(.*)$/);
+        if (match) {
+          return `<div class="lrc-line"><span class="lrc-time">${match[1]}</span><span class="lrc-text">${escapeHtml(match[2].trim())}</span></div>`;
+        }
+        return `<div class="lrc-line"><span class="lrc-text">${escapeHtml(line)}</span></div>`;
+      }).join('');
+    }
+
+    function setModalMode(mode) {
+      state.currentModalMode = mode;
+      if (mode === 'view') {
+        elements.modalModeView.classList.add('btn-primary');
+        elements.modalModeEdit.classList.remove('btn-primary');
+        elements.modalView.style.display = 'block';
+        elements.modalEdit.style.display = 'none';
+        renderLyricsView(elements.modalTextarea.value, elements.modalInstrumental.checked);
+      } else {
+        elements.modalModeView.classList.remove('btn-primary');
+        elements.modalModeEdit.classList.add('btn-primary');
+        elements.modalView.style.display = 'none';
+        elements.modalEdit.style.display = 'block';
+      }
+    }
+
+    elements.modalModeView.addEventListener('click', () => setModalMode('view'));
+    elements.modalModeEdit.addEventListener('click', () => setModalMode('edit'));
+
+    elements.modalClose.addEventListener('click', () => elements.modal.classList.remove('open'));
+    elements.modalCancel.addEventListener('click', () => elements.modal.classList.remove('open'));
+    elements.modal.addEventListener('click', (e) => {
+      if (e.target === elements.modal) elements.modal.classList.remove('open');
+    });
+
+    elements.modalCopy.addEventListener('click', async () => {
+      const text = elements.modalTextarea.value;
+      if (!text) {
+        showToast('No lyrics to copy', 'warning');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('LRC copied to clipboard!', 'success');
+      } catch (err) {
+        showToast('Clipboard access denied', 'error');
+      }
+    });
+
+    elements.modalSave.addEventListener('click', async () => {
+      if (!state.currentModalEntry) return;
+      const id = state.currentModalEntry.id;
+      const source = state.currentModalEntry.source;
+      const lyrics = elements.modalTextarea.value;
+      const instrumental = elements.modalInstrumental.checked;
+
+      try {
+        const res = await fetch(`/admin/entry?source=${encodeURIComponent(source)}&id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            syncedLyrics: lyrics || null,
+            instrumental: instrumental
+          })
+        });
+        if (!res.ok) throw new Error('Failed to update lyrics');
+        showToast('Lyrics updated successfully!', 'success');
+        elements.modal.classList.remove('open');
+        loadSummary();
+        loadSongs();
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to save lyrics', 'error');
+      }
+    });
+
+    // Quick Lookup Form
+    document.querySelectorAll('input[name="lookup-type"]').forEach(r => {
+      r.addEventListener('change', (e) => {
+        const isMeta = e.target.value === 'metadata';
+        document.getElementById('lookup-meta-fields').style.display = isMeta ? 'flex' : 'none';
+        document.getElementById('lookup-yt-fields').style.display = isMeta ? 'none' : 'flex';
+      });
+    });
+
+    document.getElementById('lookup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const isMeta = document.querySelector('input[name="lookup-type"]:checked').value === 'metadata';
+      const force = document.getElementById('lookup-force').checked;
+      const resultBox = document.getElementById('lookup-result-box');
+      const resultTitle = document.getElementById('lookup-result-title');
+      const resultBody = document.getElementById('lookup-result-body');
+
+      let url = '/api/get?';
+      if (force) url += 'force=true&';
+
+      if (isMeta) {
+        const track = document.getElementById('lookup-track').value.trim();
+        const artist = document.getElementById('lookup-artist').value.trim();
+        const album = document.getElementById('lookup-album').value.trim();
+        const duration = document.getElementById('lookup-duration').value.trim();
+        if (!track || !artist || !album || !duration) {
+          showToast('Please fill in all metadata fields', 'warning');
+          return;
+        }
+        url += `artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(track)}&album_name=${encodeURIComponent(album)}&duration=${duration}`;
+      } else {
+        const videoId = document.getElementById('lookup-videoid').value.trim();
+        if (!videoId) {
+          showToast('Please enter a YouTube video ID', 'warning');
+          return;
+        }
+        url += `videoId=${encodeURIComponent(videoId)}`;
+      }
+
+      resultBox.style.display = 'block';
+      resultTitle.textContent = 'Querying proxy...';
+      resultBody.textContent = 'Loading...';
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        resultTitle.textContent = `Status: ${res.status} ${res.statusText}`;
+        resultBody.textContent = JSON.stringify(data, null, 2);
+        if (res.ok) {
+          showToast('Lyrics fetched!', 'success');
+          loadSummary();
+        } else {
+          showToast(`Response: ${res.status}`, 'warning');
+        }
+      } catch (err) {
+        resultTitle.textContent = 'Network Error';
+        resultBody.textContent = err.message;
+        showToast('Request failed', 'error');
+      }
+    });
+
+    // Refresh stats button
+    elements.btnRefreshStats.addEventListener('click', () => {
+      loadSummary();
+      if (state.activeTab === 'songs') loadSongs();
+      if (state.activeTab === 'notfound') loadNotFound();
+      showToast('Refreshed data', 'info');
+    });
+
+    // Initialize
+    loadSummary();
+    loadSongs();
+  </script>
+</body>
+</html>

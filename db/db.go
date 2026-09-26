@@ -18,16 +18,18 @@ type DB struct {
 
 // CacheEntry represents a row in the lyrics or yt_lyrics table.
 type CacheEntry struct {
-	ArtistName   string
-	TrackName    string
-	AlbumName    string
-	Duration     int
-	VideoID      string
-	SyncedLyrics *string
-	Instrumental bool
-	Status       int
-	CachedAt     time.Time
-	NotFoundAt   *time.Time
+	ID           int64      `json:"id"`
+	Source       string     `json:"source"`
+	ArtistName   string     `json:"artistName,omitempty"`
+	TrackName    string     `json:"trackName,omitempty"`
+	AlbumName    string     `json:"albumName,omitempty"`
+	Duration     int        `json:"duration,omitempty"`
+	VideoID      string     `json:"videoId,omitempty"`
+	SyncedLyrics *string    `json:"syncedLyrics"`
+	Instrumental bool       `json:"instrumental"`
+	Status       int        `json:"status"`
+	CachedAt     time.Time  `json:"cachedAt"`
+	NotFoundAt   *time.Time `json:"notFoundAt,omitempty"`
 }
 
 // New opens (or creates) a SQLite database at path and runs schema migrations.
@@ -272,30 +274,70 @@ func (d *DB) GetSummary() (*Summary, error) {
 
 // SongEntry is one row in the cached-hits list.
 type SongEntry struct {
-	ArtistName string `json:"artistName,omitempty"`
-	TrackName  string `json:"trackName,omitempty"`
-	AlbumName  string `json:"albumName,omitempty"`
-	Duration   int    `json:"duration,omitempty"`
-	VideoID    string `json:"videoId,omitempty"`
-	CachedAt   string `json:"cachedAt"`
+	ID           int64  `json:"id"`
+	Source       string `json:"source"`
+	ArtistName   string `json:"artistName,omitempty"`
+	TrackName    string `json:"trackName,omitempty"`
+	AlbumName    string `json:"albumName,omitempty"`
+	Duration     int    `json:"duration,omitempty"`
+	VideoID      string `json:"videoId,omitempty"`
+	HasLyrics    bool   `json:"hasLyrics"`
+	Instrumental bool   `json:"instrumental"`
+	CachedAt     string `json:"cachedAt"`
 }
 
 // ListSongs returns a paginated list of cached hits, newest first.
-func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
+// If query is non-empty, matches against artist, track, album, or video ID.
+func (d *DB) ListSongs(page, limit int, query string) ([]SongEntry, int, error) {
+	trimmed := strings.ToLower(strings.TrimSpace(query))
 	var total int
-	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=200) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=200)`).Scan(&total); err != nil {
-		return nil, 0, err
+	var rows *sql.Rows
+	var err error
+
+	if trimmed == "" {
+		if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=200) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=200)`).Scan(&total); err != nil {
+			return nil, 0, err
+		}
+
+		rows, err = d.sql.Query(`
+			SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id,
+			       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, instrumental, cached_at
+			FROM lyrics WHERE status=200
+			UNION ALL
+			SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id,
+			       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
+			FROM yt_lyrics WHERE status=200
+			ORDER BY cached_at DESC
+			LIMIT ? OFFSET ?`, limit, (page-1)*limit)
+	} else {
+		pattern := "%" + trimmed + "%"
+		countQuery := `SELECT (
+			SELECT COUNT(*) FROM lyrics WHERE status=200 AND (artist_name LIKE ? OR track_name LIKE ? OR album_name LIKE ?)
+		) + (
+			SELECT COUNT(*) FROM yt_lyrics WHERE status=200 AND video_id LIKE ?
+		)`
+		if err := d.sql.QueryRow(countQuery, pattern, pattern, pattern, pattern).Scan(&total); err != nil {
+			return nil, 0, err
+		}
+
+		selectQuery := `
+			SELECT id, source, artist_name, track_name, album_name, duration, video_id, has_lyrics, instrumental, cached_at
+			FROM (
+				SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id,
+				       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, instrumental, cached_at
+				FROM lyrics
+				WHERE status=200 AND (artist_name LIKE ? OR track_name LIKE ? OR album_name LIKE ?)
+				UNION ALL
+				SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id,
+				       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
+				FROM yt_lyrics
+				WHERE status=200 AND video_id LIKE ?
+			)
+			ORDER BY cached_at DESC
+			LIMIT ? OFFSET ?`
+		rows, err = d.sql.Query(selectQuery, pattern, pattern, pattern, pattern, limit, (page-1)*limit)
 	}
 
-	rows, err := d.sql.Query(`
-		SELECT artist_name, track_name, album_name, duration, video_id, cached_at
-		FROM (
-			SELECT artist_name, track_name, album_name, duration, '' AS video_id, cached_at FROM lyrics WHERE status=200
-			UNION ALL
-			SELECT '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, cached_at FROM yt_lyrics WHERE status=200
-		)
-		ORDER BY cached_at DESC
-		LIMIT ? OFFSET ?`, limit, (page-1)*limit)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -304,9 +346,13 @@ func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
 	songs := make([]SongEntry, 0, limit)
 	for rows.Next() {
 		var s SongEntry
-		if err := rows.Scan(&s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.VideoID, &s.CachedAt); err != nil {
+		var hasLyrics int
+		var instrumental int
+		if err := rows.Scan(&s.ID, &s.Source, &s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.VideoID, &hasLyrics, &instrumental, &s.CachedAt); err != nil {
 			return nil, 0, err
 		}
+		s.HasLyrics = hasLyrics == 1
+		s.Instrumental = instrumental == 1
 		songs = append(songs, s)
 	}
 	return songs, total, rows.Err()
@@ -314,6 +360,8 @@ func (d *DB) ListSongs(page, limit int) ([]SongEntry, int, error) {
 
 // NotFoundEntry is one row in the 404 list.
 type NotFoundEntry struct {
+	ID         int64  `json:"id"`
+	Source     string `json:"source"`
 	ArtistName string `json:"artistName,omitempty"`
 	TrackName  string `json:"trackName,omitempty"`
 	AlbumName  string `json:"albumName,omitempty"`
@@ -324,21 +372,53 @@ type NotFoundEntry struct {
 }
 
 // ListNotFound returns a paginated list of 404 entries, newest first.
-func (d *DB) ListNotFound(page, limit, ttlDays int) ([]NotFoundEntry, int, error) {
+// If query is non-empty, matches against artist, track, album, or video ID.
+func (d *DB) ListNotFound(page, limit, ttlDays int, query string) ([]NotFoundEntry, int, error) {
+	trimmed := strings.ToLower(strings.TrimSpace(query))
 	var total int
-	if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=404) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=404)`).Scan(&total); err != nil {
-		return nil, 0, err
+	var rows *sql.Rows
+	var err error
+
+	if trimmed == "" {
+		if err := d.sql.QueryRow(`SELECT (SELECT COUNT(*) FROM lyrics WHERE status=404) + (SELECT COUNT(*) FROM yt_lyrics WHERE status=404)`).Scan(&total); err != nil {
+			return nil, 0, err
+		}
+
+		rows, err = d.sql.Query(`
+			SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, not_found_at
+			FROM lyrics WHERE status=404
+			UNION ALL
+			SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, not_found_at
+			FROM yt_lyrics WHERE status=404
+			ORDER BY not_found_at DESC
+			LIMIT ? OFFSET ?`, limit, (page-1)*limit)
+	} else {
+		pattern := "%" + trimmed + "%"
+		countQuery := `SELECT (
+			SELECT COUNT(*) FROM lyrics WHERE status=404 AND (artist_name LIKE ? OR track_name LIKE ? OR album_name LIKE ?)
+		) + (
+			SELECT COUNT(*) FROM yt_lyrics WHERE status=404 AND video_id LIKE ?
+		)`
+		if err := d.sql.QueryRow(countQuery, pattern, pattern, pattern, pattern).Scan(&total); err != nil {
+			return nil, 0, err
+		}
+
+		selectQuery := `
+			SELECT id, source, artist_name, track_name, album_name, duration, video_id, not_found_at
+			FROM (
+				SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, not_found_at
+				FROM lyrics
+				WHERE status=404 AND (artist_name LIKE ? OR track_name LIKE ? OR album_name LIKE ?)
+				UNION ALL
+				SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, not_found_at
+				FROM yt_lyrics
+				WHERE status=404 AND video_id LIKE ?
+			)
+			ORDER BY not_found_at DESC
+			LIMIT ? OFFSET ?`
+		rows, err = d.sql.Query(selectQuery, pattern, pattern, pattern, pattern, limit, (page-1)*limit)
 	}
 
-	rows, err := d.sql.Query(`
-		SELECT artist_name, track_name, album_name, duration, video_id, not_found_at
-		FROM (
-			SELECT artist_name, track_name, album_name, duration, '' AS video_id, not_found_at FROM lyrics WHERE status=404
-			UNION ALL
-			SELECT '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, not_found_at FROM yt_lyrics WHERE status=404
-		)
-		ORDER BY not_found_at DESC
-		LIMIT ? OFFSET ?`, limit, (page-1)*limit)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -348,7 +428,7 @@ func (d *DB) ListNotFound(page, limit, ttlDays int) ([]NotFoundEntry, int, error
 	for rows.Next() {
 		var e NotFoundEntry
 		var notFoundAt string
-		if err := rows.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.VideoID, &notFoundAt); err != nil {
+		if err := rows.Scan(&e.ID, &e.Source, &e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.VideoID, &notFoundAt); err != nil {
 			return nil, 0, err
 		}
 		e.NotFoundAt = notFoundAt
@@ -358,6 +438,127 @@ func (d *DB) ListNotFound(page, limit, ttlDays int) ([]NotFoundEntry, int, error
 		entries = append(entries, e)
 	}
 	return entries, total, rows.Err()
+}
+
+// GetEntry retrieves a single cached record by source ("lrclib" or "yt") and id.
+func (d *DB) GetEntry(source string, id int64) (*CacheEntry, error) {
+	var e CacheEntry
+	e.ID = id
+	e.Source = source
+
+	var cachedAt string
+	var notFoundAt *string
+
+	if source == "yt" {
+		row := d.sql.QueryRow(`
+			SELECT video_id, synced_lyrics, status, cached_at, not_found_at
+			FROM yt_lyrics WHERE id=?`, id)
+		if err := row.Scan(&e.VideoID, &e.SyncedLyrics, &e.Status, &cachedAt, &notFoundAt); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			}
+			return nil, err
+		}
+	} else if source == "lrclib" {
+		var instrumental int
+		row := d.sql.QueryRow(`
+			SELECT artist_name, track_name, album_name, duration, synced_lyrics, instrumental, status, cached_at, not_found_at
+			FROM lyrics WHERE id=?`, id)
+		if err := row.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.SyncedLyrics, &instrumental, &e.Status, &cachedAt, &notFoundAt); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			}
+			return nil, err
+		}
+		e.Instrumental = instrumental == 1
+	} else {
+		return nil, fmt.Errorf("invalid source: %s", source)
+	}
+
+	e.CachedAt, _ = time.Parse(time.RFC3339, cachedAt)
+	if notFoundAt != nil {
+		t, _ := time.Parse(time.RFC3339, *notFoundAt)
+		e.NotFoundAt = &t
+	}
+	return &e, nil
+}
+
+// DeleteEntry deletes a single record by source and id.
+func (d *DB) DeleteEntry(source string, id int64) error {
+	var table string
+	switch source {
+	case "yt":
+		table = "yt_lyrics"
+	case "lrclib":
+		table = "lyrics"
+	default:
+		return fmt.Errorf("invalid source: %s", source)
+	}
+	res, err := d.sql.Exec(fmt.Sprintf("DELETE FROM %s WHERE id=?", table), id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
+// UpdateLyrics manually updates synced lyrics and instrumental status for an entry.
+func (d *DB) UpdateLyrics(source string, id int64, syncedLyrics *string, instrumental bool) error {
+	now := time.Now().UTC().Format(time.RFC3339)
+	switch source {
+	case "yt":
+		res, err := d.sql.Exec(`
+			UPDATE yt_lyrics
+			SET synced_lyrics=?, status=200, cached_at=?, not_found_at=NULL
+			WHERE id=?`, syncedLyrics, now, id)
+		if err != nil {
+			return err
+		}
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			return sql.ErrNoRows
+		}
+		return nil
+	case "lrclib":
+		instr := 0
+		if instrumental {
+			instr = 1
+		}
+		res, err := d.sql.Exec(`
+			UPDATE lyrics
+			SET synced_lyrics=?, instrumental=?, status=200, cached_at=?, not_found_at=NULL
+			WHERE id=?`, syncedLyrics, instr, now, id)
+		if err != nil {
+			return err
+		}
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			return sql.ErrNoRows
+		}
+		return nil
+	default:
+		return fmt.Errorf("invalid source: %s", source)
+	}
+}
+
+// ClearAllNotFound removes all 404 records from both lyrics and yt_lyrics tables.
+func (d *DB) ClearAllNotFound() error {
+	tx, err := d.sql.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec("DELETE FROM lyrics WHERE status=404"); err != nil {
+		return err
+	}
+	if _, err := tx.Exec("DELETE FROM yt_lyrics WHERE status=404"); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // Close closes the underlying database connection.
