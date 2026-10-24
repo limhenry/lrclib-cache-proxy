@@ -92,12 +92,12 @@ func (h *AdminHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetEntry handles GET /admin/entry?source=lrclib|yt&id=123.
+// GetEntry handles GET /admin/entry?source=lrclib|yt|applemusic&id=123.
 func (h *AdminHandler) GetEntry(w http.ResponseWriter, r *http.Request) {
 	source := r.URL.Query().Get("source")
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil || (source != "lrclib" && source != "yt") {
+	if err != nil || (source != "lrclib" && source != "yt" && source != "applemusic") {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "valid source and id are required"})
 		return
 	}
@@ -115,12 +115,12 @@ func (h *AdminHandler) GetEntry(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, entry)
 }
 
-// DeleteEntry handles DELETE /admin/entry?source=lrclib|yt&id=123.
+// DeleteEntry handles DELETE /admin/entry?source=lrclib|yt|applemusic&id=123.
 func (h *AdminHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 	source := r.URL.Query().Get("source")
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil || (source != "lrclib" && source != "yt") {
+	if err != nil || (source != "lrclib" && source != "yt" && source != "applemusic") {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "valid source and id are required"})
 		return
 	}
@@ -138,12 +138,12 @@ type updateEntryRequest struct {
 	Instrumental bool    `json:"instrumental"`
 }
 
-// UpdateEntry handles PUT /admin/entry?source=lrclib|yt&id=123.
+// UpdateEntry handles PUT /admin/entry?source=lrclib|yt|applemusic&id=123.
 func (h *AdminHandler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 	source := r.URL.Query().Get("source")
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil || (source != "lrclib" && source != "yt") {
+	if err != nil || (source != "lrclib" && source != "yt" && source != "applemusic") {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "valid source and id are required"})
 		return
 	}

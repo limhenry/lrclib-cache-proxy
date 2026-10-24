@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
-	
+
 	"syscall"
 	"time"
 
@@ -39,7 +39,7 @@ func corsMiddleware(allowedOrigins []string) func(http.Handler) http.Handler {
 				for _, allowed := range allowedOrigins {
 					if originMatches(allowed, origin) {
 						w.Header().Set("Access-Control-Allow-Origin", origin)
-						w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+						w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 						w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 						w.Header().Set("Vary", "Origin")
 						break
@@ -130,6 +130,7 @@ func main() {
 	r.Use(corsMiddleware(allowedOrigins))
 
 	r.Get("/api/get", proxyH.ServeHTTP)
+	r.Post("/api/upload", proxyH.Upload)
 
 	r.Get("/admin", adminH.UI)
 	r.Get("/admin/", adminH.UI)

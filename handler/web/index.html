@@ -245,6 +245,12 @@
       border: 1px solid rgba(96, 165, 250, 0.3);
     }
 
+    .badge-apple {
+      background: var(--success-subtle);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
     .badge-yt {
       background: var(--yt-subtle);
       color: #fb7185;
@@ -605,7 +611,7 @@
       <div class="stat-card">
         <span class="stat-label">Cached Hits (200)</span>
         <span class="stat-value" id="stat-cached">-</span>
-        <span class="stat-sub">LRCLIB + YouTube</span>
+        <span class="stat-sub">LRCLIB + YouTube + Apple Music</span>
       </div>
       <div class="stat-card">
         <span class="stat-label">Not Found (404)</span>
@@ -641,7 +647,7 @@
     <section id="tab-songs">
       <div class="controls-bar" style="margin-bottom: 1rem;">
         <div class="search-box">
-          <input type="text" id="songs-search" placeholder="Search by track, artist, album, or video ID...">
+          <input type="text" id="songs-search" placeholder="Search by track, artist, album, video ID, or Apple Music track ID...">
         </div>
         <div class="pagination-bar">
           <span>Rows:</span>
@@ -967,14 +973,17 @@
         return;
       }
       elements.songsTable.innerHTML = songs.map(s => {
+        const isAppleMusic = s.source === 'applemusic';
         const isYT = s.source === 'yt' || (!s.artistName && s.videoId);
-        const sourceBadge = isYT 
+        const sourceBadge = isAppleMusic
+          ? '<span class="badge badge-apple">Apple Music</span>'
+          : isYT
           ? '<span class="badge badge-yt">YouTube</span>' 
           : '<span class="badge badge-lrclib">LRCLIB</span>';
         
-        const title = isYT ? (s.videoId) : escapeHtml(s.trackName || '-');
-        const artist = isYT ? 'YouTube Video ID' : escapeHtml(s.artistName || '-');
-        const album = isYT ? '-' : escapeHtml(s.albumName || '-');
+        const title = isAppleMusic ? 'Apple Music Track' : isYT ? escapeHtml(s.videoId) : escapeHtml(s.trackName || '-');
+        const artist = isAppleMusic ? `Track ID: ${s.trackId}` : isYT ? 'YouTube Video ID' : escapeHtml(s.artistName || '-');
+        const album = isAppleMusic || isYT ? '-' : escapeHtml(s.albumName || '-');
         const dur = formatDuration(s.duration);
         
         let lyricsBadge = '<span class="badge" style="background:#374151;color:#9ca3af;">Empty</span>';
@@ -998,7 +1007,7 @@
             <td style="text-align: right;">
               <div class="cell-actions" style="justify-content: flex-end;">
                 <button class="btn btn-sm" onclick="openLyricsModal('${s.source}', ${s.id})">View</button>
-                <button class="btn btn-sm" onclick="refetchEntry('${s.source}', ${JSON.stringify(s).replace(/"/g, '&quot;')})">Re-fetch</button>
+                ${isAppleMusic ? '' : `<button class="btn btn-sm" onclick="refetchEntry('${s.source}', ${JSON.stringify(s).replace(/"/g, '&quot;')})">Re-fetch</button>`}
                 <button class="btn btn-sm btn-danger" onclick="deleteEntry('${s.source}', ${s.id})">Delete</button>
               </div>
             </td>
@@ -1219,7 +1228,11 @@
         const entry = await res.json();
         state.currentModalEntry = entry;
 
-        if (entry.source === 'yt') {
+        if (entry.source === 'applemusic') {
+          elements.modalTitle.textContent = 'Apple Music Track';
+          elements.modalSub.textContent = `Track ID: ${entry.trackId} • Uploaded: ${formatTime(entry.cachedAt)}`;
+          elements.modalInstrumental.closest('label').style.display = 'none';
+        } else if (entry.source === 'yt') {
           elements.modalTitle.textContent = `YouTube: ${entry.videoId}`;
           elements.modalSub.textContent = `Cached: ${formatTime(entry.cachedAt)}`;
         } else {
@@ -1227,6 +1240,9 @@
           elements.modalSub.textContent = `${entry.artistName || 'Unknown Artist'} • ${entry.albumName || 'Unknown Album'} (${formatDuration(entry.duration)})`;
         }
 
+        if (entry.source !== 'applemusic') {
+          elements.modalInstrumental.closest('label').style.display = '';
+        }
         elements.modalInstrumental.checked = !!entry.instrumental;
         elements.modalTextarea.value = entry.syncedLyrics || '';
 

@@ -109,6 +109,7 @@ type ResolvedMetadata struct {
 	TrackName     string
 	AlbumName     string
 	Duration      int
+	TrackID       int64
 	Resolved      bool
 	OriginalGenre string
 	TargetCountry string
@@ -238,6 +239,7 @@ func (c *Client) ResolveMetadata(ctx context.Context, artistName, trackName, alb
 	if matchedTrack == nil {
 		return fallback, nil
 	}
+	fallback.TrackID = matchedTrack.TrackID
 
 	// 3. Check genre to determine if a target storefront is needed.
 	targetCountry := c.targetCountryForGenre(matchedTrack.PrimaryGenreName)
@@ -286,6 +288,7 @@ func (c *Client) ResolveMetadata(ctx context.Context, artistName, trackName, alb
 		TrackName:     resolvedTrack,
 		AlbumName:     resolvedAlbum,
 		Duration:      duration,
+		TrackID:       matchedTrack.TrackID,
 		Resolved:      isDifferent,
 		OriginalGenre: matchedTrack.PrimaryGenreName,
 		TargetCountry: targetCountry,

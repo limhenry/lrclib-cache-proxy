@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Apple Music Lyrics Bridge",
+  "version": "1.0.0",
+  "description": "Converts authorized Apple Music TTML lyrics to LRC and uploads them to the local lyrics proxy.",
+  "minimum_chrome_version": "111",
+  "host_permissions": [
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://music.apple.com/*"],
+      "js": ["main-world.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://music.apple.com/*"],
+      "js": ["ttml-converter.js", "content.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    }
+  ]
+}

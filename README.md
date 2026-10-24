@@ -1,6 +1,6 @@
 # lrclib-cache-proxy
 
-A lightweight caching proxy for [lrclib.net](https://lrclib.net) and YouTube Music API for synced lyrics.
+A lightweight synced-lyrics proxy that fetches from YouTube Music and [lrclib.net](https://lrclib.net), with an API for uploading user-provided Apple Music lyrics.
 
 Requests are served from a local SQLite database on cache hits, so repeat lookups are instant and don't consume upstream bandwidth. 404 responses are remembered for 7 days before the upstream is re-checked (in case lyrics have since been added).
 
@@ -30,7 +30,7 @@ The proxy is now listening on `http://localhost:3000`.
 
 ### Get lyrics
 
-The endpoint supports fetching lyrics via either **YouTube Music API** or **LRCLIB**:
+Lyrics are fetched automatically from **YouTube Music** and, when needed, **LRCLIB**. Apple Music lyrics are not fetched automatically; upload them manually with `/api/upload` as described below. iTunes is used only to match tracks and resolve localized metadata, not to fetch lyrics.
 
 #### Option 1: YouTube Music API (via `videoId`)
 
@@ -48,23 +48,52 @@ GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Ba
 
 All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`) are required.
 
-When metadata parameters are passed, the proxy first checks the local SQLite cache. On a cache miss (or with `force=true`), the proxy resolves whether the song is an Asian track (such as Chinese Mandopop/Cantopop, Korean K-Pop, Japanese J-Pop) that has English metadata (e.g. from an Apple Music US or Malaysia storefront) via the iTunes Search API. If so, it looks up the original localized metadata from the regional storefront (e.g., `田馥甄` / `靜脈` instead of `Hebe Tien` / `Deep in the Veins`, or `방탄소년단` / `봄날` instead of `BTS` / `Spring Day`).
+For a metadata request, the proxy first checks its local cache. On a cache miss, it uses iTunes Search to match the track and check for manually uploaded Apple Music lyrics by the matched `trackId`. It may also resolve localized metadata for regional Asian genres, such as Mandopop/Cantopop, K-Pop, and J-Pop (for example, `Hebe Tien` / `Deep in the Veins` to `田馥甄` / `靜脈`).
 
-The proxy then searches YouTube Music using the resolved original metadata and attempts to fetch synced lyrics. If YouTube Music returns no lyrics or fails, it automatically falls back to LRCLIB.
+If no uploaded Apple Music lyrics are found, the proxy searches YouTube Music using the resolved metadata. If YouTube Music has no lyrics or the request fails, it falls back to LRCLIB.
 
-**Optional parameter (supported on both):**
+**Optional parameter for `videoId` and metadata requests:**
 
 | Parameter    | Description                                                                        |
 | ------------ | ---------------------------------------------------------------------------------- |
-| `force=true` | Bypass the cache and always query the upstream API, then update the cached entry   |
+| `force=true` | Bypass the local lyrics cache and retry the applicable provider flow. For metadata requests, this also skips manually uploaded Apple Music lyrics. It does not apply to direct `trackId` requests. |
+
+#### Upload Apple Music lyrics manually
+
+The proxy does not download lyrics from Apple Music. If you have LRC lyrics, upload them with the Apple Music track ID. This stores the raw body in the local cache, replacing any previous upload for that ID. The body is limited to 1 MB.
+
+```bash
+curl -X POST 'http://localhost:3000/api/upload?trackId=6825795645' \
+  --data-binary '@lyrics.lrc'
+```
+
+For metadata-based retrieval, the proxy must be able to match the request to the same iTunes track ID. iTunes resolution must be enabled. If the match succeeds, uploaded lyrics are returned before YouTube Music or LRCLIB is queried.
+
+```text
+GET /api/get?artist_name=Artist&track_name=Track&album_name=Album&duration=180
+```
+
+You can also retrieve directly by track ID, without metadata or an upstream lookup:
+
+```text
+GET /api/get?trackId=6825795645
+```
+
+`trackId` identifies an Apple Music track. This cache-only request returns the standard `{ "syncedLyrics": "..." }` response, or 404 when no lyrics have been uploaded for that ID. The 404 message is `lyrics not found in cache`. `source=applemusic` is also accepted for compatibility.
 
 **200 — cache hit or upstream found:**
 
 ```json
-{ "syncedLyrics": "[00:02.21] 經過沿海的公路 越過漫漫河流\n..." }
+{
+  "syncedLyrics": "[00:02.21] 經過沿海的公路 越過漫漫河流\n...",
+  "artistName": "田馥甄",
+  "trackName": "靜脈",
+  "albumName": "日常",
+  "duration": 180
+}
 ```
 
-`syncedLyrics` is `null` when the track has no synced lyrics or is instrumental.
+Metadata-based requests include `artistName`, `trackName`, `albumName`, and `duration` in the response. When iTunes resolves localized metadata, those fields contain the localized values; otherwise they contain the requested values. `videoId` and direct `trackId` requests continue to return only `syncedLyrics`. That field is `null` when a metadata match has no synced lyrics or is instrumental.
 
 **404 — not found:**
 
@@ -76,14 +105,38 @@ The proxy then searches YouTube Music using the resolved original metadata and a
 }
 ```
 
-**502** — upstream request failed (network error or 5xx). Not cached; the next request will retry.
+**502** — an upstream request failed (network error or 5xx) during a `videoId` or metadata request. The failure is not cached, so a later request can retry. Direct `trackId` requests do not contact an upstream service.
 
-**Fallback sequence:**
-1. **Metadata Resolution (iTunes API)**: Checks iTunes Search API with the track name and artist. If the genre indicates a localized Asian genre (Mandopop, Cantopop, K-Pop, J-Pop), fetches the original native title and artist from the target storefront (default: `TW` for Mandopop, `HK` for Cantopop, `KR` for K-Pop, `JP` for J-Pop).
-2. **YouTube Music Search**: Searches YouTube Music using the resolved track metadata and ranks candidate video IDs by title, artist, album, and duration similarity. If a matching video ID with synced lyrics is found, it is returned and cached in SQLite under both the requested metadata and the resolved metadata.
-3. **LRCLIB Lookup**: If YouTube Music returns no lyrics or fails, the proxy queries LRCLIB `/api/get` with resolved metadata.
-4. **LRCLIB Search Fallback**: If LRCLIB `/api/get` returns 404, it retries via LRCLIB `/api/search` for a track with synced lyrics within ±2 seconds duration.
-5. If a match is found from either provider, it is cached in SQLite as a hit (200); otherwise the 404 is cached normally.
+**Metadata request flow:**
+1. Check the metadata cache, unless `force=true`.
+2. Use iTunes Search to match the requested track. If a matching Apple Music `trackId` has manually uploaded lyrics, return those lyrics and cache them under the requested metadata. `force=true` skips this uploaded-lyrics check.
+3. Search YouTube Music using the matched/localized metadata. A successful result is cached.
+4. If YouTube Music has no lyrics or fails, query LRCLIB `/api/get`; if that returns 404, try LRCLIB `/api/search` for synced lyrics within ±2 seconds of the requested duration.
+5. Cache a successful result, or cache a 404 when no lyrics are found.
+
+---
+
+#### Chrome extension
+
+The unpacked Chrome extension watches Apple Music lyric responses, converts TTML into line-timed LRC, and uploads each track to the local proxy using its Apple Music track ID. Word-synced lyrics are grouped by lyric line; per-word timings are not retained. It runs automatically on `music.apple.com` and logs the track ID, converted LRC, and upload result in that tab's DevTools console. It does not log the full Apple response.
+
+1. Start the proxy with `docker compose up -d`.
+2. In Chrome 111 or later, open `chrome://extensions` and enable **Developer mode**.
+3. Select **Load unpacked** and choose the repository's `chrome-extension` folder.
+4. Open Apple Music and play a track. Check the tab's DevTools console for conversion and upload status.
+
+The extension only matches the Apple Music web app and sends uploads to `http://localhost:3000`. Keep the local proxy running while using it.
+
+To run the extension checks:
+
+```bash
+cd chrome-extension
+npm install
+npm test
+npm run check
+```
+
+The XML parser dependency is only used by the Node tests; the extension uses Chrome's built-in `DOMParser`.
 
 ---
 
@@ -93,8 +146,8 @@ The proxy then searches YouTube Music using the resolved original metadata and a
 
 Open `http://localhost:3000/admin` in any browser to access the lightweight, built-in management interface:
 - **Zero framework / zero external assets**: Single self-contained HTML/CSS/JS page embedded directly in the binary (~25 KB) with practically 0 MB idle RAM overhead.
-- **Cache Dashboard**: Real-time stats for cached tracks, negative-cache 404s, database file size, and timestamps.
-- **Browse & Search**: Paginated table of cached tracks with live search filtering across track names, artists, albums, or YouTube video IDs.
+- **Cache Dashboard**: Real-time stats for cached LRCLIB, YouTube, and Apple Music entries, negative-cache 404s, database file size, and timestamps.
+- **Browse & Search**: Paginated table of cached tracks with live search filtering across track names, artists, albums, YouTube video IDs, or Apple Music track IDs.
 - **Lyrics Inspector & Editor**: View formatted synced lyrics with timecode pills, one-click copy to clipboard, in-place lyrics editor, and instrumental toggle.
 - **Cache Eviction & Upstream Refresh**: Delete cached entries or trigger immediate force re-fetch from upstream (`force=true`).
 - **404 Management**: View negative cache retry-after timers, retry individual tracks, or flush all 404s in one click.
@@ -116,7 +169,7 @@ Overall cache stats.
 
 #### `GET /admin/songs?page=1&limit=50&q=query`
 
-Paginated list of successfully cached tracks, newest first. Supports optional keyword search (`q`).
+Paginated list of successfully cached metadata-based, YouTube, and Apple Music entries, newest first. Supports optional keyword search (`q`), including Apple Music track IDs.
 
 ```json
 {
@@ -142,6 +195,14 @@ Paginated list of successfully cached tracks, newest first. Supports optional ke
       "hasLyrics": true,
       "instrumental": false,
       "cachedAt": "2026-05-30T09:30:00Z"
+    },
+    {
+      "id": 6825795645,
+      "source": "applemusic",
+      "trackId": 6825795645,
+      "hasLyrics": true,
+      "instrumental": false,
+      "cachedAt": "2026-05-30T09:20:00Z"
     }
   ]
 }
@@ -171,17 +232,17 @@ Paginated list of tracks that returned 404, newest first. Supports optional keyw
 }
 ```
 
-#### `GET /admin/entry?source=lrclib|yt&id=123`
+#### `GET /admin/entry?source=lrclib|yt|applemusic&id=123`
 
-Fetches detailed cache entry including full `syncedLyrics` content and `instrumental` flag.
+Fetches a detailed cache entry including full `syncedLyrics` content. For Apple Music, `id` is the Apple Music `trackId`.
 
-#### `DELETE /admin/entry?source=lrclib|yt&id=123`
+#### `DELETE /admin/entry?source=lrclib|yt|applemusic&id=123`
 
 Deletes a cached track or 404 record from the database.
 
-#### `PUT /admin/entry?source=lrclib|yt&id=123`
+#### `PUT /admin/entry?source=lrclib|yt|applemusic&id=123`
 
-Updates `syncedLyrics` and/or `instrumental` status for an entry.
+Updates `syncedLyrics` and/or `instrumental` status for an entry. The `instrumental` field is ignored for Apple Music entries.
 
 ```json
 {
@@ -196,13 +257,13 @@ Flushes all 404 negative-cache records across both LRCLIB and YouTube tables.
 
 ## Configuration
 
-All options are set via environment variables.
+The binary reads these options from environment variables. Docker Compose does not pass every variable through automatically; see the Compose note below.
 
 | Variable                  | Default              | Description                                                                                         |
 | ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
 | `HOST_PORT`               | `3000`               | Host port Docker binds on — change this to expose on a different port (e.g. `9876`)                 |
-| `PORT`                    | `3000`               | Port the binary listens on **inside** the container — only needed if you change the `ports` mapping |
-| `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file                                                                    |
+| `PORT`                    | `3000`               | Port the binary listens on. For Docker, changing it also requires passing `PORT` into the container and updating the container-side port mapping. |
+| `DB_PATH`            | `./lyrics.db`        | Path to the SQLite database file (`/data/lyrics.db` in the provided Docker Compose file)             |
 | `LRCLIB_BASE_URL`    | `https://lrclib.net` | Base URL of the upstream lrclib instance                                                            |
 | `NOT_FOUND_TTL_DAYS` | `7`                  | Days to serve a cached 404 before re-checking upstream                                              |
 | `ALLOWED_ORIGINS`    | _(empty)_            | Comma-separated extra CORS origins beyond `http://localhost:*` (e.g. `https://example.com`)         |
@@ -213,12 +274,9 @@ All options are set via environment variables.
 | `ITUNES_KPOP_COUNTRY`     | `KR`                 | Target storefront for K-Pop tracks                                                                 |
 | `ITUNES_JPOP_COUNTRY`     | `JP`                 | Target storefront for J-Pop tracks                                                                 |
 
-Copy `.env.example` to `.env` and edit as needed, then pass it to Compose:
+Copy `.env.example` to `.env` to configure Compose interpolation such as `HOST_PORT` and `ALLOWED_ORIGINS`. Compose does not automatically pass all `.env` values into the container. The provided Compose file sets `DB_PATH`, `LRCLIB_BASE_URL`, and `NOT_FOUND_TTL_DAYS` directly, so change its `environment` section to override them. To customize iTunes settings in Docker, add the corresponding `ITUNES_*` variables to that section.
 
-```yaml
-# docker-compose.yml
-env_file: .env
-```
+When running the binary directly, export the variables in your shell before starting it.
 
 ## Cache behaviour
 
@@ -227,8 +285,9 @@ env_file: .env
 | Track cached (200)            | Returned from SQLite immediately — upstream never called                                                |
 | Track cached (404), age < TTL | 404 returned immediately — upstream never called                                                        |
 | Track cached (404), age ≥ TTL | Re-queried from upstream (iTunes resolution -> YouTube Music search -> LRCLIB); record updated           |
-| Track not in cache            | Resolved via iTunes, searched on YouTube Music, fallback to LRCLIB; result cached (200 or 404) in DB    |
-| `force=true`                  | Cache bypassed; upstream always queried and cached entry updated                                        |
+| Metadata request not in cache | Check uploaded Apple Music lyrics by iTunes track ID, then search YouTube Music and fall back to LRCLIB |
+| `GET /api/get?trackId=...`    | Reads only the manually uploaded Apple Music cache; no upstream request is made                         |
+| `force=true`                  | On metadata and `videoId` requests, bypasses their caches and retries the provider flow. Metadata requests also skip uploaded Apple Music lyrics. It does not affect direct `trackId` requests. |
 | Upstream 5xx or network error | 502 returned; **nothing cached** — next request retries upstream                                        |
 
 > **Note:** artist name, track name, and album name are normalised (lowercased and trimmed) before storage, so `Taylor Swift` and `taylor swift` resolve to the same cache entry. Video IDs are case-sensitive and only trimmed.
@@ -257,6 +316,12 @@ DB_PATH=./lyrics.db ./lrclib-cache-proxy
 │   ├── search.go       # Search API (/youtubei/v1/search) & video ID scoring
 │   ├── next.go         # Next API (/youtubei/v1/next) & browseId lookup
 │   └── browse.go       # Browse API (/youtubei/v1/browse) & synced lyrics fetching
+├── chrome-extension/
+│   ├── manifest.json   # Apple Music host match and local proxy permission
+│   ├── main-world.js   # Lyrics API response observer
+│   ├── content.js      # TTML conversion handoff and console output
+│   ├── ttml-converter.js # TTML-to-LRC conversion
+│   └── service-worker.js # Duplicate check and local upload
 ├── handler/
 │   ├── proxy.go        # GET /api/get — cache logic, iTunes resolution, YouTube Music & LRCLIB
 │   └── admin.go        # GET /admin/* — stats and list endpoints

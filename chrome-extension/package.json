@@ -1,0 +1,11 @@
+{
+  "name": "apple-music-lyrics-bridge-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check main-world.js && node --check content.js && node --check service-worker.js && node --check ttml-converter.js"
+  },
+  "devDependencies": {
+    "@xmldom/xmldom": "^0.8.10"
+  }
+}

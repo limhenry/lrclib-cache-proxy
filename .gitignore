@@ -11,3 +11,6 @@ lrclib-cache-proxy
 
 # Environment
 .env
+
+# Node test dependencies
+node_modules/

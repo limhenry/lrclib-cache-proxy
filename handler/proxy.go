@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -37,6 +38,20 @@ func NewProxyHandler(database *db.DB, client *lrclib.Client, ytClient *ytmusic.C
 
 type syncedLyricsResponse struct {
 	SyncedLyrics *string `json:"syncedLyrics"`
+	ArtistName   string  `json:"artistName,omitempty"`
+	TrackName    string  `json:"trackName,omitempty"`
+	AlbumName    string  `json:"albumName,omitempty"`
+	Duration     int     `json:"duration,omitempty"`
+}
+
+func metadataLyricsResponse(lyrics *string, artistName, trackName, albumName string, duration int) syncedLyricsResponse {
+	return syncedLyricsResponse{
+		SyncedLyrics: lyrics,
+		ArtistName:   artistName,
+		TrackName:    trackName,
+		AlbumName:    albumName,
+		Duration:     duration,
+	}
 }
 
 type errorResponse struct {
@@ -53,6 +68,17 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
+	source := strings.TrimSpace(q.Get("source"))
+	trackIDStr := strings.TrimSpace(q.Get("trackId"))
+	if source != "" || trackIDStr != "" {
+		if source != "" && source != "applemusic" {
+			writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "trackId identifies an Apple Music track"})
+			return
+		}
+		h.handleSourceTrack(w, trackIDStr)
+		return
+	}
+
 	videoID := strings.TrimSpace(q.Get("videoId"))
 	force := q.Get("force") == "true"
 
@@ -86,6 +112,66 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.handleLRCLIB(w, r, artistName, trackName, albumName, duration, force)
+}
+
+func (h *ProxyHandler) handleSourceTrack(w http.ResponseWriter, trackIDStr string) {
+	trackID, err := strconv.ParseInt(trackIDStr, 10, 64)
+	if err != nil || trackID <= 0 {
+		writeJSON(w, http.StatusBadRequest, errorResponse{
+			Code:    400,
+			Name:    "BadRequest",
+			Message: "a positive Apple Music trackId is required",
+		})
+		return
+	}
+
+	lyrics, err := h.db.LookupSourceLyrics("applemusic", trackID)
+	if err != nil {
+		slog.Error("source lyrics lookup failed", "err", err, "source", "applemusic", "trackId", trackID)
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
+		return
+	}
+	if lyrics == nil {
+		writeJSON(w, http.StatusNotFound, errorResponse{Code: 404, Name: "TrackNotFound", Message: "lyrics not found in cache"})
+		return
+	}
+	writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: lyrics})
+}
+
+// Upload stores raw synced lyrics for a supported external track ID.
+func (h *ProxyHandler) Upload(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	source := strings.TrimSpace(q.Get("source"))
+	trackID, err := strconv.ParseInt(strings.TrimSpace(q.Get("trackId")), 10, 64)
+	if (source != "" && source != "applemusic") || err != nil || trackID <= 0 {
+		writeJSON(w, http.StatusBadRequest, errorResponse{
+			Code:    400,
+			Name:    "BadRequest",
+			Message: "a positive Apple Music trackId is required",
+		})
+		return
+	}
+
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20+1))
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "failed to read lyrics body"})
+		return
+	}
+	if len(body) > 1<<20 {
+		writeJSON(w, http.StatusRequestEntityTooLarge, errorResponse{Code: 413, Name: "PayloadTooLarge", Message: "lyrics body exceeds 1 MB"})
+		return
+	}
+	if strings.TrimSpace(string(body)) == "" {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Code: 400, Name: "BadRequest", Message: "lyrics body must not be empty"})
+		return
+	}
+
+	if err := h.db.InsertSourceLyrics("applemusic", trackID, string(body)); err != nil {
+		slog.Error("source lyrics upload failed", "err", err, "source", source, "trackId", trackID)
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to store lyrics"})
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]bool{"ok": true})
 }
 
 func (h *ProxyHandler) handleYouTube(w http.ResponseWriter, r *http.Request, videoID string, force bool) {
@@ -165,7 +251,27 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 	if entry != nil {
 		if entry.Status == 200 {
 			slog.Debug("cache hit (200)", "track", trackName, "artist", artistName)
-			writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: entry.SyncedLyrics})
+			responseArtist, responseTrack, responseAlbum := artistName, trackName, albumName
+			metadata, metadataErr := h.db.LookupMetadataResolution(artistName, trackName, albumName, duration)
+			if metadataErr != nil {
+				slog.Error("metadata resolution lookup failed", "err", metadataErr)
+				writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
+				return
+			}
+			if metadata != nil {
+				responseArtist, responseTrack, responseAlbum = metadata.ArtistName, metadata.TrackName, metadata.AlbumName
+			} else if h.itunesClient != nil {
+				resolved, resolveErr := h.itunesClient.ResolveMetadata(r.Context(), artistName, trackName, albumName, duration)
+				if resolveErr == nil && resolved != nil {
+					responseArtist, responseTrack, responseAlbum = resolved.ArtistName, resolved.TrackName, resolved.AlbumName
+					if dbErr := h.db.InsertMetadataResolution(artistName, trackName, albumName, duration, responseArtist, responseTrack, responseAlbum); dbErr != nil {
+						slog.Warn("metadata resolution cache insert failed", "err", dbErr)
+					}
+				} else if resolveErr != nil {
+					slog.Warn("itunes metadata resolution failed for cache hit", "err", resolveErr, "track", trackName)
+				}
+			}
+			writeJSON(w, http.StatusOK, metadataLyricsResponse(entry.SyncedLyrics, responseArtist, responseTrack, responseAlbum, duration))
 			return
 		}
 		// Status == 404
@@ -186,20 +292,27 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 	searchTrack := trackName
 	searchAlbum := albumName
 	var isResolved bool
+	var appleTrackID int64
 
 	if h.itunesClient != nil {
 		resolved, err := h.itunesClient.ResolveMetadata(r.Context(), artistName, trackName, albumName, duration)
 		if err != nil {
 			slog.Warn("itunes metadata resolution failed, using original metadata", "err", err, "track", trackName)
-		} else if resolved != nil && resolved.Resolved {
-			slog.Info("resolved localized metadata via itunes",
-				"originalTrack", trackName, "resolvedTrack", resolved.TrackName,
-				"originalArtist", artistName, "resolvedArtist", resolved.ArtistName,
-				"genre", resolved.OriginalGenre, "country", resolved.TargetCountry)
-			searchArtist = resolved.ArtistName
-			searchTrack = resolved.TrackName
-			searchAlbum = resolved.AlbumName
-			isResolved = true
+		} else if resolved != nil {
+			appleTrackID = resolved.TrackID
+			if dbErr := h.db.InsertMetadataResolution(artistName, trackName, albumName, duration, resolved.ArtistName, resolved.TrackName, resolved.AlbumName); dbErr != nil {
+				slog.Warn("metadata resolution cache insert failed", "err", dbErr)
+			}
+			if resolved.Resolved {
+				slog.Info("resolved localized metadata via itunes",
+					"originalTrack", trackName, "resolvedTrack", resolved.TrackName,
+					"originalArtist", artistName, "resolvedArtist", resolved.ArtistName,
+					"genre", resolved.OriginalGenre, "country", resolved.TargetCountry)
+				searchArtist = resolved.ArtistName
+				searchTrack = resolved.TrackName
+				searchAlbum = resolved.AlbumName
+				isResolved = true
+			}
 		}
 	}
 
@@ -225,6 +338,21 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 		}
 	}
 
+	if appleTrackID > 0 && !force {
+		lyrics, dbErr := h.db.LookupSourceLyrics("applemusic", appleTrackID)
+		if dbErr != nil {
+			slog.Error("apple music lyrics lookup failed", "err", dbErr, "trackId", appleTrackID)
+			writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "internal error"})
+			return
+		}
+		if lyrics != nil {
+			cacheHit(lyrics, false)
+			slog.Info("served uploaded apple music lyrics", "track", trackName, "artist", artistName, "trackId", appleTrackID)
+			writeJSON(w, http.StatusOK, metadataLyricsResponse(lyrics, searchArtist, searchTrack, searchAlbum, duration))
+			return
+		}
+	}
+
 	// Try YouTube Music first with resolved metadata.
 	videoID, ytErr := h.ytClient.GetVideoID(r.Context(), searchTrack, searchArtist, searchAlbum, duration)
 	if ytErr != nil && isResolved {
@@ -242,7 +370,7 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 				slog.Error("db insert yt hit failed", "err", dbErr)
 			}
 			slog.Info("cached track via ytmusic", "track", searchTrack, "artist", searchArtist, "videoId", videoID)
-			writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: &syncedLyrics})
+			writeJSON(w, http.StatusOK, metadataLyricsResponse(&syncedLyrics, searchArtist, searchTrack, searchAlbum, duration))
 			return
 		}
 		slog.Info("ytmusic get lyrics failed or empty, falling back to lrclib", "err", lyricsErr, "track", searchTrack, "videoId", videoID)
@@ -270,7 +398,7 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 				}
 				cacheHit(syncedLyrics, searchResult.Instrumental)
 				slog.Info("cached track via search fallback", "track", searchTrack, "artist", searchArtist)
-				writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
+				writeJSON(w, http.StatusOK, metadataLyricsResponse(syncedLyrics, searchArtist, searchTrack, searchAlbum, duration))
 				return
 			}
 
@@ -284,7 +412,7 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 					}
 					cacheHit(syncedLyrics, origResult.Instrumental)
 					slog.Info("cached track via original metadata lrclib", "track", trackName, "artist", artistName)
-					writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
+					writeJSON(w, http.StatusOK, metadataLyricsResponse(syncedLyrics, artistName, trackName, albumName, duration))
 					return
 				}
 			}
@@ -325,5 +453,5 @@ func (h *ProxyHandler) handleLRCLIB(w http.ResponseWriter, r *http.Request, arti
 
 	cacheHit(syncedLyrics, result.Instrumental)
 	slog.Info("cached new track", "track", searchTrack, "artist", searchArtist)
-	writeJSON(w, http.StatusOK, syncedLyricsResponse{SyncedLyrics: syncedLyrics})
+	writeJSON(w, http.StatusOK, metadataLyricsResponse(syncedLyrics, searchArtist, searchTrack, searchAlbum, duration))
 }
