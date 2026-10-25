@@ -116,6 +116,8 @@ func main() {
 			"cantopop", itunesCantopopCountry,
 			"kpop", itunesKpopCountry,
 			"jpop", itunesJpopCountry)
+	} else {
+		slog.Warn("itunes metadata resolution disabled; metadata requests cannot match uploaded Apple Music lyrics")
 	}
 
 	client := lrclib.NewClient(lrclibBaseURL)

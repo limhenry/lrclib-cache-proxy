@@ -3,6 +3,7 @@ package handler
 import (
 	_ "embed"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -50,6 +51,7 @@ func (h *AdminHandler) UI(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) Summary(w http.ResponseWriter, r *http.Request) {
 	summary, err := h.db.GetSummary()
 	if err != nil {
+		slog.Error("admin summary query failed", "err", err)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to get summary"})
 		return
 	}
@@ -63,6 +65,7 @@ func (h *AdminHandler) Songs(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	songs, total, err := h.db.ListSongs(page, limit, q)
 	if err != nil {
+		slog.Error("admin songs query failed", "err", err, "page", page, "limit", limit)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to list songs"})
 		return
 	}
@@ -81,6 +84,7 @@ func (h *AdminHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	entries, total, err := h.db.ListNotFound(page, limit, h.notFoundTTL, q)
 	if err != nil {
+		slog.Error("admin not-found query failed", "err", err, "page", page, "limit", limit)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to list not-found entries"})
 		return
 	}
@@ -104,6 +108,7 @@ func (h *AdminHandler) GetEntry(w http.ResponseWriter, r *http.Request) {
 
 	entry, err := h.db.GetEntry(source, id)
 	if err != nil {
+		slog.Error("admin entry query failed", "err", err, "source", source, "id", id)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to get entry"})
 		return
 	}
@@ -126,6 +131,7 @@ func (h *AdminHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.db.DeleteEntry(source, id); err != nil {
+		slog.Error("admin entry delete failed", "err", err, "source", source, "id", id)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to delete entry"})
 		return
 	}
@@ -155,6 +161,7 @@ func (h *AdminHandler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.db.UpdateLyrics(source, id, req.SyncedLyrics, req.Instrumental); err != nil {
+		slog.Error("admin lyrics update failed", "err", err, "source", source, "id", id)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to update entry"})
 		return
 	}
@@ -165,6 +172,7 @@ func (h *AdminHandler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 // ClearNotFound handles POST /admin/not-found/clear.
 func (h *AdminHandler) ClearNotFound(w http.ResponseWriter, r *http.Request) {
 	if err := h.db.ClearAllNotFound(); err != nil {
+		slog.Error("admin not-found clear failed", "err", err)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Code: 500, Name: "InternalError", Message: "failed to clear 404 records"})
 		return
 	}

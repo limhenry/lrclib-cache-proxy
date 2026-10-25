@@ -1,5 +1,6 @@
 const proxyBaseURL = "http://localhost:3000";
 const pendingUploads = new Map();
+const lastUploadedLyrics = new Map();
 
 function isAppleMusicPage(url) {
   try {
@@ -9,18 +10,30 @@ function isAppleMusicPage(url) {
   }
 }
 
-async function uploadIfChanged(trackId, lyrics) {
-  const lookupURL = `${proxyBaseURL}/api/get?trackId=${encodeURIComponent(trackId)}`;
-  const existingResponse = await fetch(lookupURL, { method: "GET", credentials: "omit" });
-  if (existingResponse.ok) {
-    const existing = await existingResponse.json();
-    if (existing.syncedLyrics === lyrics) return { ok: true, unchanged: true };
-  } else if (existingResponse.status !== 404) {
-    throw new Error(`Proxy lookup returned HTTP ${existingResponse.status}`);
-  }
+function metadataParams(metadata) {
+  return new URLSearchParams({
+    artist_name: metadata.artistName,
+    track_name: metadata.trackName,
+    album_name: metadata.albumName,
+    duration: String(metadata.duration)
+  });
+}
 
+function metadataKey(metadata) {
+  return [metadata.artistName, metadata.trackName, metadata.albumName, metadata.duration]
+    .map((value) => String(value).trim().toLowerCase())
+    .join("\u001f");
+}
+
+async function uploadIfChanged(metadata, lyrics) {
+  const key = metadataKey(metadata);
+  if (lastUploadedLyrics.get(key) === lyrics) return { ok: true, unchanged: true };
+
+  const params = metadataParams(metadata);
+  const uploadParams = new URLSearchParams(params);
+  uploadParams.set("source", "applemusic");
   const uploadResponse = await fetch(
-    `${proxyBaseURL}/api/upload?trackId=${encodeURIComponent(trackId)}`,
+    `${proxyBaseURL}/api/upload?${uploadParams}`,
     {
       method: "POST",
       headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -38,16 +51,18 @@ async function uploadIfChanged(trackId, lyrics) {
     }
     throw new Error(message);
   }
+  lastUploadedLyrics.set(key, lyrics);
   return { ok: true, unchanged: false };
 }
 
-function queueUpload(trackId, lyrics) {
-  const previous = pendingUploads.get(trackId) || Promise.resolve();
-  const task = previous.catch(() => {}).then(() => uploadIfChanged(trackId, lyrics));
-  pendingUploads.set(trackId, task);
+function queueUpload(metadata, lyrics) {
+  const key = metadataKey(metadata);
+  const previous = pendingUploads.get(key) || Promise.resolve();
+  const task = previous.catch(() => {}).then(() => uploadIfChanged(metadata, lyrics));
+  pendingUploads.set(key, task);
 
   return task.finally(() => {
-    if (pendingUploads.get(trackId) === task) pendingUploads.delete(trackId);
+    if (pendingUploads.get(key) === task) pendingUploads.delete(key);
   });
 }
 
@@ -58,14 +73,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return;
   }
 
-  const trackId = String(message.trackId || "");
+  const metadata = message.metadata || {};
   const lyrics = message.lyrics;
-  if (!/^\d{1,19}$/.test(trackId) || typeof lyrics !== "string" || lyrics.trim() === "") {
-    sendResponse({ ok: false, error: "Invalid track ID or empty LRC." });
+  if (typeof metadata.artistName !== "string" || !metadata.artistName.trim() || metadata.artistName.toLowerCase() === "unknown" ||
+      typeof metadata.trackName !== "string" || !metadata.trackName.trim() ||
+      typeof metadata.albumName !== "string" || !metadata.albumName.trim() ||
+      !Number.isInteger(metadata.duration) || metadata.duration < 0 ||
+      typeof lyrics !== "string" || lyrics.trim() === "") {
+    sendResponse({ ok: false, error: "Valid artist, track, album, duration, and nonempty LRC are required." });
     return;
   }
 
-  queueUpload(trackId, lyrics)
+  queueUpload(metadata, lyrics)
     .then(sendResponse)
     .catch((error) => sendResponse({ ok: false, error: error.message }));
   return true;

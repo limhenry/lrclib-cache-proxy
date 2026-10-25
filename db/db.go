@@ -26,6 +26,7 @@ type CacheEntry struct {
 	Duration     int        `json:"duration,omitempty"`
 	VideoID      string     `json:"videoId,omitempty"`
 	TrackID      int64      `json:"trackId,omitempty"`
+	LyricsSource string     `json:"lyricsSource,omitempty"`
 	SyncedLyrics *string    `json:"syncedLyrics"`
 	Instrumental bool       `json:"instrumental"`
 	Status       int        `json:"status"`
@@ -63,6 +64,7 @@ func (d *DB) migrate() error {
 			album_name    TEXT NOT NULL,
 			duration      INTEGER NOT NULL,
 			synced_lyrics TEXT,
+			lyrics_source TEXT NOT NULL DEFAULT 'unknown',
 			instrumental  INTEGER NOT NULL DEFAULT 0,
 			status        INTEGER NOT NULL,
 			cached_at     DATETIME NOT NULL,
@@ -102,7 +104,42 @@ func (d *DB) migrate() error {
 			return fmt.Errorf("exec %q: %w", stmt[:min(len(stmt), 40)], err)
 		}
 	}
+	if err := d.ensureLyricsSourceColumn(); err != nil {
+		return fmt.Errorf("ensure lyrics_source column: %w", err)
+	}
 	return nil
+}
+
+func (d *DB) ensureLyricsSourceColumn() error {
+	rows, err := d.sql.Query(`PRAGMA table_info(lyrics)`)
+	if err != nil {
+		return err
+	}
+	found := false
+	for rows.Next() {
+		var cid, notNull, primaryKey int
+		var name, columnType string
+		var defaultValue sql.NullString
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			return err
+		}
+		if name == "lyrics_source" {
+			found = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	if found {
+		return nil
+	}
+	_, err = d.sql.Exec(`ALTER TABLE lyrics ADD COLUMN lyrics_source TEXT NOT NULL DEFAULT 'unknown'`)
+	return err
 }
 
 func min(a, b int) int {
@@ -121,7 +158,7 @@ func normalize(s string) string {
 func (d *DB) Lookup(artistName, trackName, albumName string, duration int) (*CacheEntry, error) {
 	row := d.sql.QueryRow(`
 		SELECT artist_name, track_name, album_name, duration,
-		       synced_lyrics, instrumental, status, cached_at, not_found_at
+		       synced_lyrics, lyrics_source, instrumental, status, cached_at, not_found_at
 		FROM lyrics
 		WHERE artist_name=? AND track_name=? AND album_name=? AND duration=?`,
 		normalize(artistName), normalize(trackName), normalize(albumName), duration,
@@ -134,7 +171,7 @@ func (d *DB) Lookup(artistName, trackName, albumName string, duration int) (*Cac
 
 	err := row.Scan(
 		&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration,
-		&e.SyncedLyrics, &instrumental, &e.Status, &cachedAt, &notFoundAt,
+		&e.SyncedLyrics, &e.LyricsSource, &instrumental, &e.Status, &cachedAt, &notFoundAt,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -183,25 +220,29 @@ func (d *DB) LookupYT(videoID string) (*CacheEntry, error) {
 }
 
 // InsertHit stores (or updates) a successful lrclib lyrics result.
-func (d *DB) InsertHit(artistName, trackName, albumName string, duration int, syncedLyrics *string, instrumental bool) error {
+func (d *DB) InsertHit(artistName, trackName, albumName string, duration int, syncedLyrics *string, instrumental bool, lyricsSource string) error {
 	instr := 0
 	if instrumental {
 		instr = 1
 	}
+	if lyricsSource == "" {
+		lyricsSource = "unknown"
+	}
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := d.sql.Exec(`
 		INSERT INTO lyrics
-		    (artist_name, track_name, album_name, duration, synced_lyrics, instrumental, status, cached_at)
-		VALUES (?, ?, ?, ?, ?, ?, 200, ?)
+		    (artist_name, track_name, album_name, duration, synced_lyrics, lyrics_source, instrumental, status, cached_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, 200, ?)
 		ON CONFLICT(artist_name, track_name, album_name, duration)
 		DO UPDATE SET
 		    synced_lyrics = excluded.synced_lyrics,
+		    lyrics_source = excluded.lyrics_source,
 		    instrumental  = excluded.instrumental,
 		    status        = 200,
 		    cached_at     = excluded.cached_at,
 		    not_found_at  = NULL`,
 		normalize(artistName), normalize(trackName), normalize(albumName),
-		duration, syncedLyrics, instr, now,
+		duration, syncedLyrics, lyricsSource, instr, now,
 	)
 	return err
 }
@@ -371,6 +412,7 @@ type SongEntry struct {
 	Duration     int    `json:"duration,omitempty"`
 	VideoID      string `json:"videoId,omitempty"`
 	TrackID      int64  `json:"trackId,omitempty"`
+	LyricsSource string `json:"lyricsSource,omitempty"`
 	HasLyrics    bool   `json:"hasLyrics"`
 	Instrumental bool   `json:"instrumental"`
 	CachedAt     string `json:"cachedAt"`
@@ -390,15 +432,15 @@ func (d *DB) ListSongs(page, limit int, query string) ([]SongEntry, int, error) 
 		}
 
 		rows, err = d.sql.Query(`
-			SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, 0 AS track_id,
+			SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, 0 AS track_id, lyrics_source,
 			       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, instrumental, cached_at
 			FROM lyrics WHERE status=200
 			UNION ALL
-			SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, 0 AS track_id,
+			SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, 0 AS track_id, 'ytmusic' AS lyrics_source,
 			       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
 			FROM yt_lyrics WHERE status=200
 			UNION ALL
-			SELECT track_id AS id, 'applemusic' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, '' AS video_id, track_id,
+			SELECT track_id AS id, 'applemusic' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, '' AS video_id, track_id, 'applemusic' AS lyrics_source,
 			       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
 			FROM source_lyrics WHERE source='applemusic'
 			ORDER BY cached_at DESC
@@ -417,19 +459,19 @@ func (d *DB) ListSongs(page, limit int, query string) ([]SongEntry, int, error) 
 		}
 
 		selectQuery := `
-			SELECT id, source, artist_name, track_name, album_name, duration, video_id, track_id, has_lyrics, instrumental, cached_at
+			SELECT id, source, artist_name, track_name, album_name, duration, video_id, track_id, lyrics_source, has_lyrics, instrumental, cached_at
 			FROM (
-				SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, 0 AS track_id,
+				SELECT id, 'lrclib' AS source, artist_name, track_name, album_name, duration, '' AS video_id, 0 AS track_id, lyrics_source,
 				       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, instrumental, cached_at
 				FROM lyrics
 				WHERE status=200 AND (artist_name LIKE ? OR track_name LIKE ? OR album_name LIKE ?)
 				UNION ALL
-				SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, 0 AS track_id,
+				SELECT id, 'yt' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, video_id, 0 AS track_id, 'ytmusic' AS lyrics_source,
 				       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
 				FROM yt_lyrics
 				WHERE status=200 AND video_id LIKE ?
 				UNION ALL
-				SELECT track_id AS id, 'applemusic' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, '' AS video_id, track_id,
+				SELECT track_id AS id, 'applemusic' AS source, '' AS artist_name, '' AS track_name, '' AS album_name, 0 AS duration, '' AS video_id, track_id, 'applemusic' AS lyrics_source,
 				       (synced_lyrics IS NOT NULL AND synced_lyrics != '') AS has_lyrics, 0 AS instrumental, cached_at
 				FROM source_lyrics
 				WHERE source='applemusic' AND CAST(track_id AS TEXT) LIKE ?
@@ -449,7 +491,7 @@ func (d *DB) ListSongs(page, limit int, query string) ([]SongEntry, int, error) 
 		var s SongEntry
 		var hasLyrics int
 		var instrumental int
-		if err := rows.Scan(&s.ID, &s.Source, &s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.VideoID, &s.TrackID, &hasLyrics, &instrumental, &s.CachedAt); err != nil {
+		if err := rows.Scan(&s.ID, &s.Source, &s.ArtistName, &s.TrackName, &s.AlbumName, &s.Duration, &s.VideoID, &s.TrackID, &s.LyricsSource, &hasLyrics, &instrumental, &s.CachedAt); err != nil {
 			return nil, 0, err
 		}
 		s.HasLyrics = hasLyrics == 1
@@ -563,9 +605,9 @@ func (d *DB) GetEntry(source string, id int64) (*CacheEntry, error) {
 	} else if source == "lrclib" {
 		var instrumental int
 		row := d.sql.QueryRow(`
-			SELECT artist_name, track_name, album_name, duration, synced_lyrics, instrumental, status, cached_at, not_found_at
+			SELECT artist_name, track_name, album_name, duration, synced_lyrics, lyrics_source, instrumental, status, cached_at, not_found_at
 			FROM lyrics WHERE id=?`, id)
-		if err := row.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.SyncedLyrics, &instrumental, &e.Status, &cachedAt, &notFoundAt); err != nil {
+		if err := row.Scan(&e.ArtistName, &e.TrackName, &e.AlbumName, &e.Duration, &e.SyncedLyrics, &e.LyricsSource, &instrumental, &e.Status, &cachedAt, &notFoundAt); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, nil
 			}
@@ -573,6 +615,7 @@ func (d *DB) GetEntry(source string, id int64) (*CacheEntry, error) {
 		}
 		e.Instrumental = instrumental == 1
 	} else if source == "applemusic" {
+		e.LyricsSource = "applemusic"
 		row := d.sql.QueryRow(`
 			SELECT track_id, synced_lyrics, cached_at
 			FROM source_lyrics WHERE source='applemusic' AND track_id=?`, id)

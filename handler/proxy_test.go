@@ -19,33 +19,20 @@ func TestAppleMusicUploadCanBeRetrievedFromCache(t *testing.T) {
 	}
 	defer database.Close()
 
-	itunesServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(`{"resultCount":1,"results":[{"trackId":6825795645,"artistName":"Test Artist","trackName":"Sample Track","collectionName":"Test Album","trackTimeMillis":180000,"primaryGenreName":"Pop","country":"US"}]}`))
-	}))
-	defer itunesServer.Close()
-	itunesClient := itunes.NewClient(itunes.Config{BaseURL: itunesServer.URL})
-	handler := NewProxyHandler(database, nil, nil, itunesClient, 7)
+	handler := NewProxyHandler(database, nil, nil, nil, 7)
 	lyrics := "[00:01.00] Sample lyric\n"
-	upload := httptest.NewRequest(http.MethodPost, "/api/upload?trackId=6825795645", strings.NewReader(lyrics))
+	legacyUpload := httptest.NewRequest(http.MethodPost, "/api/upload?trackId=6825795645", strings.NewReader(lyrics))
+	legacyUploadResponse := httptest.NewRecorder()
+	handler.Upload(legacyUploadResponse, legacyUpload)
+	if legacyUploadResponse.Code != http.StatusBadRequest {
+		t.Fatalf("trackId-only upload status = %d, want %d", legacyUploadResponse.Code, http.StatusBadRequest)
+	}
+
+	upload := httptest.NewRequest(http.MethodPost, "/api/upload?source=applemusic&artist_name=Test+Artist&track_name=Sample+Track&album_name=Test+Album&duration=180", strings.NewReader(lyrics))
 	uploadResponse := httptest.NewRecorder()
 	handler.Upload(uploadResponse, upload)
 	if uploadResponse.Code != http.StatusCreated {
 		t.Fatalf("upload status = %d, want %d: %s", uploadResponse.Code, http.StatusCreated, uploadResponse.Body.String())
-	}
-
-	get := httptest.NewRequest(http.MethodGet, "/api/get?trackId=6825795645", nil)
-	getResponse := httptest.NewRecorder()
-	handler.ServeHTTP(getResponse, get)
-	if getResponse.Code != http.StatusOK {
-		t.Fatalf("get status = %d, want %d: %s", getResponse.Code, http.StatusOK, getResponse.Body.String())
-	}
-
-	var body syncedLyricsResponse
-	if err := json.Unmarshal(getResponse.Body.Bytes(), &body); err != nil {
-		t.Fatal(err)
-	}
-	if body.SyncedLyrics == nil || *body.SyncedLyrics != lyrics {
-		t.Fatalf("retrieved lyrics = %v, want %q", body.SyncedLyrics, lyrics)
 	}
 
 	metadataGet := httptest.NewRequest(http.MethodGet, "/api/get?artist_name=Test+Artist&track_name=Sample+Track&album_name=Test+Album&duration=180", nil)
@@ -54,14 +41,26 @@ func TestAppleMusicUploadCanBeRetrievedFromCache(t *testing.T) {
 	if metadataResponse.Code != http.StatusOK {
 		t.Fatalf("metadata get status = %d, want %d: %s", metadataResponse.Code, http.StatusOK, metadataResponse.Body.String())
 	}
+	var body syncedLyricsResponse
 	if err := json.Unmarshal(metadataResponse.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
 	if body.SyncedLyrics == nil || *body.SyncedLyrics != lyrics {
 		t.Fatalf("metadata get lyrics = %v, want %q", body.SyncedLyrics, lyrics)
 	}
+	if body.Source != "applemusic" {
+		t.Fatalf("metadata source = %q, want applemusic", body.Source)
+	}
 	if body.ArtistName != "Test Artist" || body.TrackName != "Sample Track" || body.AlbumName != "Test Album" || body.Duration != 180 {
 		t.Fatalf("metadata response = %+v", body)
+	}
+
+	songs, total, err := database.ListSongs(1, 10, "Test Artist")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 1 || len(songs) != 1 || songs[0].Source != "lrclib" || songs[0].LyricsSource != "applemusic" || songs[0].TrackName != "sample track" {
+		t.Fatalf("metadata-keyed Apple Music admin entry = total %d, songs %+v", total, songs)
 	}
 }
 
@@ -105,6 +104,9 @@ func TestMetadataResponseUsesLocalizedMetadata(t *testing.T) {
 	if body.ArtistName != "田馥甄" || body.TrackName != "靜脈" || body.AlbumName != "日常" || body.Duration != 180 {
 		t.Fatalf("localized metadata = %+v", body)
 	}
+	if body.Source != "applemusic" {
+		t.Fatalf("localized response source = %q, want applemusic", body.Source)
+	}
 
 	cachedResponse := httptest.NewRecorder()
 	handler.ServeHTTP(cachedResponse, request)
@@ -116,6 +118,47 @@ func TestMetadataResponseUsesLocalizedMetadata(t *testing.T) {
 	}
 	if body.ArtistName != "田馥甄" || body.TrackName != "靜脈" || body.AlbumName != "日常" {
 		t.Fatalf("cached localized metadata = %+v", body)
+	}
+	if body.Source != "applemusic" {
+		t.Fatalf("cached localized source = %q, want applemusic", body.Source)
+	}
+}
+
+func TestGetReturnsLyricsSourceForCachedProviders(t *testing.T) {
+	database, err := db.New(filepath.Join(t.TempDir(), "lyrics.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	lyrics := "[00:01.00] Cached lyric\n"
+	if err := database.InsertHit("Artist", "LRCLIB Track", "Album", 180, &lyrics, false, "lrclib"); err != nil {
+		t.Fatal(err)
+	}
+	if err := database.InsertYTHit("video-id", &lyrics); err != nil {
+		t.Fatal(err)
+	}
+	handler := NewProxyHandler(database, nil, nil, nil, 7)
+
+	metadataResponse := httptest.NewRecorder()
+	metadataRequest := httptest.NewRequest(http.MethodGet, "/api/get?artist_name=Artist&track_name=LRCLIB+Track&album_name=Album&duration=180", nil)
+	handler.ServeHTTP(metadataResponse, metadataRequest)
+	var metadataBody syncedLyricsResponse
+	if err := json.Unmarshal(metadataResponse.Body.Bytes(), &metadataBody); err != nil {
+		t.Fatal(err)
+	}
+	if metadataResponse.Code != http.StatusOK || metadataBody.Source != "lrclib" {
+		t.Fatalf("metadata cache response status/source = %d/%q, want 200/lrclib", metadataResponse.Code, metadataBody.Source)
+	}
+
+	youtubeResponse := httptest.NewRecorder()
+	handler.ServeHTTP(youtubeResponse, httptest.NewRequest(http.MethodGet, "/api/get?videoId=video-id", nil))
+	var youtubeBody syncedLyricsResponse
+	if err := json.Unmarshal(youtubeResponse.Body.Bytes(), &youtubeBody); err != nil {
+		t.Fatal(err)
+	}
+	if youtubeResponse.Code != http.StatusOK || youtubeBody.Source != "ytmusic" {
+		t.Fatalf("videoId cache response status/source = %d/%q, want 200/ytmusic", youtubeResponse.Code, youtubeBody.Source)
 	}
 }
 

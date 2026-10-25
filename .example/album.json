@@ -1,0 +1,1482 @@
+{
+    "data": [
+        {
+            "id": "6812476961",
+            "type": "albums",
+            "href": "/v1/catalog/my/albums/6812476961?l=en-GB",
+            "attributes": {
+                "artistName": "Various Artists",
+                "artwork": {
+                    "bgColor": "7e8db8",
+                    "hasP3": false,
+                    "height": 1425,
+                    "textColor1": "130d1b",
+                    "textColor2": "1c162b",
+                    "textColor3": "28273a",
+                    "textColor4": "2f2e47",
+                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                    "width": 1425
+                },
+                "audioTraits": [
+                    "lossless",
+                    "lossy-stereo"
+                ],
+                "contentRating": "explicit",
+                "copyright": "℗ 2026 Atlantic Recording Corporation and Take-Two Interactive Software, Inc.",
+                "genreNames": [
+                    "Soundtrack",
+                    "Music"
+                ],
+                "isCompilation": true,
+                "isComplete": false,
+                "isMasteredForItunes": false,
+                "isPrerelease": true,
+                "isSingle": false,
+                "name": "Grand Theft Auto VI: The Album",
+                "playParams": {
+                    "id": "6812476961",
+                    "kind": "album"
+                },
+                "recordLabel": "Atlantic Records",
+                "releaseDate": "2026-11-19",
+                "trackCount": 34,
+                "upc": "075679556424",
+                "url": "https://music.apple.com/my/album/grand-theft-auto-vi-the-album/6812476961"
+            },
+            "relationships": {
+                "artists": {
+                    "href": "/v1/catalog/my/albums/6812476961/artists?l=en-GB",
+                    "data": []
+                },
+                "tracks": {
+                    "href": "/v1/catalog/my/albums/6812476961/tracks?l=en-GB",
+                    "data": [
+                        {
+                            "id": "6812476962",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812476962?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606641",
+                                "name": "Track 1",
+                                "previews": [],
+                                "trackNumber": 1,
+                                "url": "https://music.apple.com/my/album/track-1/6812476961?i=6812476962"
+                            }
+                        },
+                        {
+                            "id": "6812476964",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812476964?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Yung Lean",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Emmanuel Hailemariam, Jonatan Aron Leandoer Håstad, Leland Tyler Wayne, Nayvadius Wilburn & Rami Dawod",
+                                "contentRating": "explicit",
+                                "discNumber": 1,
+                                "durationInMillis": 161733,
+                                "genreNames": [
+                                    "Hip-Hop/Rap",
+                                    "Music"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606642",
+                                "name": "That's It (feat. Future & Metro Boomin)",
+                                "playParams": {
+                                    "id": "6812476964",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/a6/1e/91/a61e918e-7702-3bab-93a8-64c7e2e5b226/mzaf_941946533757986247.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 2,
+                                "url": "https://music.apple.com/my/album/thats-it-feat-future-metro-boomin/6812476961?i=6812476964"
+                            }
+                        },
+                        {
+                            "id": "6812477266",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477266?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606643",
+                                "name": "Track 3",
+                                "previews": [],
+                                "trackNumber": 3,
+                                "url": "https://music.apple.com/my/album/track-3/6812476961?i=6812477266"
+                            }
+                        },
+                        {
+                            "id": "6812477268",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477268?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Travis Scott",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "hi-res-lossless",
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Guy-Manuel de Homem-Christo & Jacques Webster II",
+                                "contentRating": "explicit",
+                                "discNumber": 1,
+                                "durationInMillis": 180000,
+                                "genreNames": [
+                                    "Hip-Hop/Rap",
+                                    "Music"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606644",
+                                "name": "RHYNO",
+                                "playParams": {
+                                    "id": "6812477268",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/99/53/d0/9953d057-869a-f242-362f-250a9601c4db/mzaf_805019643435930889.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 4,
+                                "url": "https://music.apple.com/my/album/rhyno/6812476961?i=6812477268"
+                            }
+                        },
+                        {
+                            "id": "6812477269",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477269?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "CA7RIEL & Paco Amoroso, PinkPantheress, Fred again.. & Etienne de Crécy",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Boo, Carl Hampton, Catriel Guerreiro, Etienne de Crécy, Fred Gibson, Homer Banks, PinkPantheress, Raymond Jackson, Ulises Guerriero & Vicente Jimenez Gomez",
+                                "discNumber": 1,
+                                "durationInMillis": 195840,
+                                "genreNames": [
+                                    "Pop",
+                                    "Music",
+                                    "Dance"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606645",
+                                "name": "Sexy Magic",
+                                "playParams": {
+                                    "id": "6812477269",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/46/b6/d1/46b6d122-77c4-f68a-a4f3-6c5297b57460/mzaf_3041033198730811390.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 5,
+                                "url": "https://music.apple.com/my/album/sexy-magic/6812476961?i=6812477269"
+                            }
+                        },
+                        {
+                            "id": "6812477273",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477273?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Justice, King Gizzard & The Lizard Wizard, Tame Impala & SZA",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "discNumber": 1,
+                                "durationInMillis": 221190,
+                                "genreNames": [
+                                    "Alternative",
+                                    "Music",
+                                    "Pop"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606646",
+                                "name": "Flower In A Hurricane",
+                                "playParams": {
+                                    "id": "6812477273",
+                                    "kind": "song"
+                                },
+                                "previews": [],
+                                "trackNumber": 6,
+                                "url": "https://music.apple.com/my/album/flower-in-a-hurricane/6812476961?i=6812477273"
+                            }
+                        },
+                        {
+                            "id": "6812477282",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477282?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606647",
+                                "name": "Track 7",
+                                "previews": [],
+                                "trackNumber": 7,
+                                "url": "https://music.apple.com/my/album/track-7/6812476961?i=6812477282"
+                            }
+                        },
+                        {
+                            "id": "6812477290",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477290?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Morgan Wallen",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Blake Pendergrass, Chase McGill, John Byron, Morgan Wallen & Ryan Vojtesak",
+                                "discNumber": 1,
+                                "durationInMillis": 196000,
+                                "genreNames": [
+                                    "Country",
+                                    "Music"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606648",
+                                "name": "Last Thing You Need",
+                                "playParams": {
+                                    "id": "6812477290",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/6c/a6/35/6ca635bf-5556-933f-a2de-cf441db29152/mzaf_13651366116944144341.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 8,
+                                "url": "https://music.apple.com/my/album/last-thing-you-need/6812476961?i=6812477290"
+                            }
+                        },
+                        {
+                            "id": "6812477297",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477297?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606649",
+                                "name": "Track 9",
+                                "previews": [],
+                                "trackNumber": 9,
+                                "url": "https://music.apple.com/my/album/track-9/6812476961?i=6812477297"
+                            }
+                        },
+                        {
+                            "id": "6812477298",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477298?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Fuerza Regida",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "es-ES",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Carlos Daniel Gutierrez Trujillo, Diego Armando Millán Medrano, Garrison Webster, Javier Mercado, Jesus Ortiz Paz, Jonathan Caro & Oswaldo Yahir López Alderete",
+                                "contentRating": "explicit",
+                                "discNumber": 1,
+                                "durationInMillis": 111655,
+                                "genreNames": [
+                                    "Latin",
+                                    "Music",
+                                    "Regional Mexican"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606650",
+                                "name": "Suzuki",
+                                "playParams": {
+                                    "id": "6812477298",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/f0/50/ef/f050efc7-3d4c-1500-8806-8ad6ace47c5e/mzaf_4525459374117180853.plus.aac.p.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-10-08",
+                                "trackNumber": 10,
+                                "url": "https://music.apple.com/my/album/suzuki/6812476961?i=6812477298"
+                            }
+                        },
+                        {
+                            "id": "6812477299",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477299?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Rauw Alejandro",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Carlos Samuel Vega, Jorge Cedeño Echevarria, Nino Karlo Segarra & Raul Alejandro Ocasio Ruiz",
+                                "contentRating": "explicit",
+                                "discNumber": 1,
+                                "durationInMillis": 173882,
+                                "genreNames": [
+                                    "Latin",
+                                    "Music"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606651",
+                                "name": "Macacoa 2000",
+                                "playParams": {
+                                    "id": "6812477299",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/65/02/4165021a-1e86-54cc-5f2e-d44f7d8ccbca/mzaf_11821577154500705056.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 11,
+                                "url": "https://music.apple.com/my/album/macacoa-2000/6812476961?i=6812477299"
+                            }
+                        },
+                        {
+                            "id": "6812477300",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477300?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606652",
+                                "name": "Track 12",
+                                "previews": [],
+                                "trackNumber": 12,
+                                "url": "https://music.apple.com/my/album/track-12/6812476961?i=6812477300"
+                            }
+                        },
+                        {
+                            "id": "6812477301",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477301?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606653",
+                                "name": "Track 13",
+                                "previews": [],
+                                "trackNumber": 13,
+                                "url": "https://music.apple.com/my/album/track-13/6812476961?i=6812477301"
+                            }
+                        },
+                        {
+                            "id": "6812477302",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477302?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606654",
+                                "name": "Track 14",
+                                "previews": [],
+                                "trackNumber": 14,
+                                "url": "https://music.apple.com/my/album/track-14/6812476961?i=6812477302"
+                            }
+                        },
+                        {
+                            "id": "6812477303",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477303?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606655",
+                                "name": "Track 15",
+                                "previews": [],
+                                "trackNumber": 15,
+                                "url": "https://music.apple.com/my/album/track-15/6812476961?i=6812477303"
+                            }
+                        },
+                        {
+                            "id": "6812477304",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477304?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606656",
+                                "name": "Track 16",
+                                "previews": [],
+                                "trackNumber": 16,
+                                "url": "https://music.apple.com/my/album/track-16/6812476961?i=6812477304"
+                            }
+                        },
+                        {
+                            "id": "6812477305",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477305?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606657",
+                                "name": "Track 17",
+                                "previews": [],
+                                "trackNumber": 17,
+                                "url": "https://music.apple.com/my/album/track-17/6812476961?i=6812477305"
+                            }
+                        },
+                        {
+                            "id": "6812477306",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477306?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606658",
+                                "name": "Track 18",
+                                "previews": [],
+                                "trackNumber": 18,
+                                "url": "https://music.apple.com/my/album/track-18/6812476961?i=6812477306"
+                            }
+                        },
+                        {
+                            "id": "6812477308",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477308?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Cardi B",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "ANDERSON HERNANDEZ, Andre Betts, Belcalis Almanzar, Jordan Thorpe & Timothy Mosley",
+                                "contentRating": "explicit",
+                                "discNumber": 1,
+                                "durationInMillis": 164200,
+                                "genreNames": [
+                                    "Hip-Hop/Rap",
+                                    "Music"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606659",
+                                "name": "Don't Chart",
+                                "playParams": {
+                                    "id": "6812477308",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/55/78/f7/5578f779-e74f-bf4f-8017-2062f35772d3/mzaf_5375412169938547333.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-10-08",
+                                "trackNumber": 19,
+                                "url": "https://music.apple.com/my/album/dont-chart/6812476961?i=6812477308"
+                            }
+                        },
+                        {
+                            "id": "6812477309",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477309?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606660",
+                                "name": "Track 20",
+                                "previews": [],
+                                "trackNumber": 20,
+                                "url": "https://music.apple.com/my/album/track-20/6812476961?i=6812477309"
+                            }
+                        },
+                        {
+                            "id": "6812477311",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477311?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606661",
+                                "name": "Track 21",
+                                "previews": [],
+                                "trackNumber": 21,
+                                "url": "https://music.apple.com/my/album/track-21/6812476961?i=6812477311"
+                            }
+                        },
+                        {
+                            "id": "6812477312",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477312?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606662",
+                                "name": "Track 22",
+                                "previews": [],
+                                "trackNumber": 22,
+                                "url": "https://music.apple.com/my/album/track-22/6812476961?i=6812477312"
+                            }
+                        },
+                        {
+                            "id": "6812477313",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477313?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606663",
+                                "name": "Track 23",
+                                "previews": [],
+                                "trackNumber": 23,
+                                "url": "https://music.apple.com/my/album/track-23/6812476961?i=6812477313"
+                            }
+                        },
+                        {
+                            "id": "6812477314",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477314?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606664",
+                                "name": "Track 24",
+                                "previews": [],
+                                "trackNumber": 24,
+                                "url": "https://music.apple.com/my/album/track-24/6812476961?i=6812477314"
+                            }
+                        },
+                        {
+                            "id": "6812477315",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477315?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606665",
+                                "name": "Track 25",
+                                "previews": [],
+                                "trackNumber": 25,
+                                "url": "https://music.apple.com/my/album/track-25/6812476961?i=6812477315"
+                            }
+                        },
+                        {
+                            "id": "6812477316",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477316?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606666",
+                                "name": "Track 26",
+                                "previews": [],
+                                "trackNumber": 26,
+                                "url": "https://music.apple.com/my/album/track-26/6812476961?i=6812477316"
+                            }
+                        },
+                        {
+                            "id": "6812477317",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477317?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606667",
+                                "name": "Track 27",
+                                "previews": [],
+                                "trackNumber": 27,
+                                "url": "https://music.apple.com/my/album/track-27/6812476961?i=6812477317"
+                            }
+                        },
+                        {
+                            "id": "6812477318",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477318?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606668",
+                                "name": "Track 28",
+                                "previews": [],
+                                "trackNumber": 28,
+                                "url": "https://music.apple.com/my/album/track-28/6812476961?i=6812477318"
+                            }
+                        },
+                        {
+                            "id": "6812477319",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477319?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606669",
+                                "name": "Track 29",
+                                "previews": [],
+                                "trackNumber": 29,
+                                "url": "https://music.apple.com/my/album/track-29/6812476961?i=6812477319"
+                            }
+                        },
+                        {
+                            "id": "6812477320",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477320?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606670",
+                                "name": "Track 30",
+                                "previews": [],
+                                "trackNumber": 30,
+                                "url": "https://music.apple.com/my/album/track-30/6812476961?i=6812477320"
+                            }
+                        },
+                        {
+                            "id": "6812477321",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477321?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606671",
+                                "name": "Track 31",
+                                "previews": [],
+                                "trackNumber": 31,
+                                "url": "https://music.apple.com/my/album/track-31/6812476961?i=6812477321"
+                            }
+                        },
+                        {
+                            "id": "6812477507",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477507?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "Keith Richards",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [
+                                    "hi-res-lossless",
+                                    "lossless",
+                                    "lossy-stereo"
+                                ],
+                                "composerName": "Jimmy Reed",
+                                "discNumber": 1,
+                                "durationInMillis": 210910,
+                                "genreNames": [
+                                    "Rock",
+                                    "Music",
+                                    "Folk"
+                                ],
+                                "hasLyrics": true,
+                                "hasTimeSyncedLyrics": true,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": true,
+                                "isrc": "USAT22606672",
+                                "name": "Bright Lights, Big City",
+                                "playParams": {
+                                    "id": "6812477507",
+                                    "kind": "song"
+                                },
+                                "previews": [
+                                    {
+                                        "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/20/92/15/209215a5-b664-225e-60e3-9a9b294b26e0/mzaf_755695266917625190.plus.aac.ep.m4a"
+                                    }
+                                ],
+                                "releaseDate": "2026-09-17",
+                                "trackNumber": 32,
+                                "url": "https://music.apple.com/my/album/bright-lights-big-city/6812476961?i=6812477507"
+                            }
+                        },
+                        {
+                            "id": "6812477515",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477515?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606673",
+                                "name": "Track 33",
+                                "previews": [],
+                                "trackNumber": 33,
+                                "url": "https://music.apple.com/my/album/track-33/6812476961?i=6812477515"
+                            }
+                        },
+                        {
+                            "id": "6812477516",
+                            "type": "songs",
+                            "href": "/v1/catalog/my/songs/6812477516?l=en-GB",
+                            "attributes": {
+                                "albumArtistName": "Various Artists",
+                                "albumName": "Grand Theft Auto VI: The Album",
+                                "artistName": "unknown",
+                                "artwork": {
+                                    "bgColor": "7e8db8",
+                                    "hasP3": false,
+                                    "height": 1425,
+                                    "textColor1": "130d1b",
+                                    "textColor2": "1c162b",
+                                    "textColor3": "28273a",
+                                    "textColor4": "2f2e47",
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5d/d3/1c/5dd31c9c-1e1c-0bbc-104f-4a42e2bb4c59/075679556424.jpg/{w}x{h}bb.jpg",
+                                    "width": 1425
+                                },
+                                "audioLocale": "en-US",
+                                "audioTraits": [],
+                                "discNumber": 1,
+                                "genreNames": [
+                                    "Soundtrack",
+                                    "Music"
+                                ],
+                                "hasLyrics": false,
+                                "hasTimeSyncedLyrics": false,
+                                "isAppleDigitalMaster": false,
+                                "isMasteredForItunes": false,
+                                "isVocalAttenuationAllowed": false,
+                                "isrc": "USAT22606674",
+                                "name": "Track 34",
+                                "previews": [],
+                                "trackNumber": 34,
+                                "url": "https://music.apple.com/my/album/track-34/6812476961?i=6812477516"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

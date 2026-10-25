@@ -13,7 +13,7 @@
   "content_scripts": [
     {
       "matches": ["https://music.apple.com/*"],
-      "js": ["main-world.js"],
+      "js": ["main.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },

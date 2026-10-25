@@ -647,7 +647,7 @@
     <section id="tab-songs">
       <div class="controls-bar" style="margin-bottom: 1rem;">
         <div class="search-box">
-          <input type="text" id="songs-search" placeholder="Search by track, artist, album, video ID, or Apple Music track ID...">
+          <input type="text" id="songs-search" placeholder="Search by track, artist, album, or video ID...">
         </div>
         <div class="pagination-bar">
           <span>Rows:</span>
@@ -973,17 +973,17 @@
         return;
       }
       elements.songsTable.innerHTML = songs.map(s => {
-        const isAppleMusic = s.source === 'applemusic';
-        const isYT = s.source === 'yt' || (!s.artistName && s.videoId);
+        const isAppleMusic = s.lyricsSource === 'applemusic' || s.source === 'applemusic';
+        const isYT = s.lyricsSource === 'ytmusic' || s.source === 'yt' || (!s.artistName && s.videoId);
         const sourceBadge = isAppleMusic
           ? '<span class="badge badge-apple">Apple Music</span>'
           : isYT
           ? '<span class="badge badge-yt">YouTube</span>' 
           : '<span class="badge badge-lrclib">LRCLIB</span>';
         
-        const title = isAppleMusic ? 'Apple Music Track' : isYT ? escapeHtml(s.videoId) : escapeHtml(s.trackName || '-');
-        const artist = isAppleMusic ? `Track ID: ${s.trackId}` : isYT ? 'YouTube Video ID' : escapeHtml(s.artistName || '-');
-        const album = isAppleMusic || isYT ? '-' : escapeHtml(s.albumName || '-');
+        const title = isYT ? escapeHtml(s.videoId) : escapeHtml(s.trackName || (isAppleMusic ? 'Apple Music Track' : '-'));
+        const artist = isYT ? 'YouTube Video ID' : escapeHtml(s.artistName || (s.trackId ? `Legacy track ID: ${s.trackId}` : '-'));
+        const album = isYT ? '-' : escapeHtml(s.albumName || '-');
         const dur = formatDuration(s.duration);
         
         let lyricsBadge = '<span class="badge" style="background:#374151;color:#9ca3af;">Empty</span>';
@@ -1227,10 +1227,11 @@
         if (!res.ok) throw new Error('Failed to load entry details');
         const entry = await res.json();
         state.currentModalEntry = entry;
+        const isAppleMusic = entry.lyricsSource === 'applemusic' || entry.source === 'applemusic';
 
-        if (entry.source === 'applemusic') {
-          elements.modalTitle.textContent = 'Apple Music Track';
-          elements.modalSub.textContent = `Track ID: ${entry.trackId} • Uploaded: ${formatTime(entry.cachedAt)}`;
+        if (isAppleMusic) {
+          elements.modalTitle.textContent = entry.trackName || 'Apple Music Track';
+          elements.modalSub.textContent = `${entry.artistName || 'Unknown Artist'} • ${entry.albumName || 'Unknown Album'} (${formatDuration(entry.duration)}) • Apple Music • ${formatTime(entry.cachedAt)}`;
           elements.modalInstrumental.closest('label').style.display = 'none';
         } else if (entry.source === 'yt') {
           elements.modalTitle.textContent = `YouTube: ${entry.videoId}`;
