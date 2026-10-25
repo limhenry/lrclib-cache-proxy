@@ -5,7 +5,7 @@
   "description": "Converts authorized Apple Music TTML lyrics to LRC and uploads them to the local lyrics proxy.",
   "minimum_chrome_version": "111",
   "host_permissions": [
-    "https://lrclib.home.limhenry.xyz/*"
+    "http://localhost:3000/*"
   ],
   "background": {
     "service_worker": "service-worker.js"

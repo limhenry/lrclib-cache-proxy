@@ -1,4 +1,4 @@
-const proxyBaseURL = "https://lrclib.home.limhenry.xyz";
+const proxyBaseURL = "http://localhost:3000";
 const pendingUploads = new Map();
 const lastUploadedLyrics = new Map();
 
