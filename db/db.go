@@ -235,9 +235,18 @@ func (d *DB) InsertHit(artistName, trackName, albumName string, duration int, sy
 		VALUES (?, ?, ?, ?, ?, ?, ?, 200, ?)
 		ON CONFLICT(artist_name, track_name, album_name, duration)
 		DO UPDATE SET
-		    synced_lyrics = excluded.synced_lyrics,
-		    lyrics_source = excluded.lyrics_source,
-		    instrumental  = excluded.instrumental,
+		    synced_lyrics = CASE
+		        WHEN lyrics.lyrics_source='applemusic' AND excluded.lyrics_source!='applemusic' THEN lyrics.synced_lyrics
+		        ELSE excluded.synced_lyrics
+		    END,
+		    lyrics_source = CASE
+		        WHEN lyrics.lyrics_source='applemusic' AND excluded.lyrics_source!='applemusic' THEN lyrics.lyrics_source
+		        ELSE excluded.lyrics_source
+		    END,
+		    instrumental  = CASE
+		        WHEN lyrics.lyrics_source='applemusic' AND excluded.lyrics_source!='applemusic' THEN lyrics.instrumental
+		        ELSE excluded.instrumental
+		    END,
 		    status        = 200,
 		    cached_at     = excluded.cached_at,
 		    not_found_at  = NULL`,

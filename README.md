@@ -50,6 +50,8 @@ All four query parameters (`artist_name`, `track_name`, `album_name`, `duration`
 
 For a metadata request, the proxy first checks its local cache, including Apple Music lyrics uploaded under the same artist, track, album, and duration. On a cache miss, it may use iTunes Search to resolve localized metadata for regional Asian genres, such as Mandopop/Cantopop, K-Pop, and J-Pop (for example, `Hebe Tien` / `Deep in the Veins` to `田馥甄` / `靜脈`).
 
+When Apple Music and another provider have lyrics for the same metadata key, Apple Music takes priority; a later YouTube Music or LRCLIB cache write will not replace it.
+
 If no uploaded Apple Music lyrics are found, the proxy searches YouTube Music using the resolved metadata. If YouTube Music has no lyrics or the request fails, it falls back to LRCLIB.
 
 **Optional parameter for `videoId` and metadata requests:**

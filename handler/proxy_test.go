@@ -21,6 +21,10 @@ func TestAppleMusicUploadCanBeRetrievedFromCache(t *testing.T) {
 
 	handler := NewProxyHandler(database, nil, nil, nil, 7)
 	lyrics := "[00:01.00] Sample lyric\n"
+	youtubeLyrics := "[00:01.00] YouTube version\n"
+	if err := database.InsertHit("Test Artist", "Sample Track", "Test Album", 180, &youtubeLyrics, false, "ytmusic"); err != nil {
+		t.Fatal(err)
+	}
 	legacyUpload := httptest.NewRequest(http.MethodPost, "/api/upload?trackId=6825795645", strings.NewReader(lyrics))
 	legacyUploadResponse := httptest.NewRecorder()
 	handler.Upload(legacyUploadResponse, legacyUpload)
@@ -33,6 +37,9 @@ func TestAppleMusicUploadCanBeRetrievedFromCache(t *testing.T) {
 	handler.Upload(uploadResponse, upload)
 	if uploadResponse.Code != http.StatusCreated {
 		t.Fatalf("upload status = %d, want %d: %s", uploadResponse.Code, http.StatusCreated, uploadResponse.Body.String())
+	}
+	if err := database.InsertHit("Test Artist", "Sample Track", "Test Album", 180, &youtubeLyrics, false, "ytmusic"); err != nil {
+		t.Fatal(err)
 	}
 
 	metadataGet := httptest.NewRequest(http.MethodGet, "/api/get?artist_name=Test+Artist&track_name=Sample+Track&album_name=Test+Album&duration=180", nil)
