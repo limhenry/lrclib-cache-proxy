@@ -12,10 +12,19 @@
       const lyricsMatch = requestURL.pathname.match(/^\/v1\/catalog\/[^/]+\/songs\/(\d+)\/syllable-lyrics\/?$/);
       if (lyricsMatch) return { kind: "lyrics", catalogId: lyricsMatch[1] };
 
-      if (/^\/v1\/catalog\/[^/]+\/albums\/?$/.test(requestURL.pathname) &&
-          requestURL.searchParams.get("include")?.split(",").includes("tracks")) {
-        const albumIDs = (requestURL.searchParams.get("ids") || "").split(",").filter(Boolean);
-        if (albumIDs.length > 0) return { kind: "album-tracks", albumIDs };
+      const includesTracks = requestURL.searchParams.get("include")?.split(",").includes("tracks");
+      const catalogCollectionMatch = requestURL.pathname.match(/^\/v1\/catalog\/[^/]+\/(albums|playlists)\/?$/);
+      if (catalogCollectionMatch && includesTracks) {
+        const collectionIDs = (requestURL.searchParams.get("ids") || "").split(",").filter(Boolean);
+        if (collectionIDs.length > 0) {
+          const collectionType = catalogCollectionMatch[1] === "playlists" ? "playlist" : "album";
+          return { kind: "collection-tracks", collectionIDs, collectionType };
+        }
+      }
+
+      const playlistMatch = requestURL.pathname.match(/^\/v1\/me\/library\/playlists\/([^/]+)\/?$/);
+      if (playlistMatch && includesTracks) {
+        return { kind: "collection-tracks", collectionIDs: [decodeURIComponent(playlistMatch[1])], collectionType: "playlist" };
       }
       return null;
     } catch {
@@ -48,24 +57,27 @@
     }, location.origin);
   }
 
-  function postAlbumTracks(albumIDs, payload) {
+  function postCollectionTracks(collectionIDs, collectionType, payload) {
     if (!Array.isArray(payload?.data)) return;
-    const requestedAlbums = new Set(albumIDs);
+    const requestedCollections = new Set(collectionIDs);
     const tracks = [];
+    const collectionNames = [];
 
-    for (const album of payload.data) {
-      if (!requestedAlbums.has(String(album?.id || ""))) continue;
-      const albumName = album?.attributes?.name || "";
-      for (const track of album?.relationships?.tracks?.data || []) {
+    for (const collection of payload.data) {
+      if (!requestedCollections.has(String(collection?.id || ""))) continue;
+      const albumName = collection?.attributes?.name || "";
+      collectionNames.push(albumName || "(unnamed)");
+      for (const track of collection?.relationships?.tracks?.data || []) {
         const attributes = track?.attributes || {};
         const durationInMillis = Number(attributes.durationInMillis);
         const artistName = String(attributes.artistName || "").trim();
         const trackName = String(attributes.name || "").trim();
         const resolvedAlbumName = String(attributes.albumName || albumName).trim();
-        if (!track?.id || !artistName || artistName.toLowerCase() === "unknown" || !trackName || !resolvedAlbumName || !Number.isFinite(durationInMillis) || durationInMillis <= 0) continue;
+        const catalogId = String(attributes.playParams?.catalogId || track?.id || "");
+        if (!/^\d+$/.test(catalogId) || !artistName || artistName.toLowerCase() === "unknown" || !trackName || !resolvedAlbumName || !Number.isFinite(durationInMillis) || durationInMillis <= 0) continue;
 
         tracks.push({
-          catalogId: String(track.id),
+          catalogId,
           artistName,
           trackName,
           albumName: resolvedAlbumName,
@@ -74,15 +86,22 @@
       }
     }
 
+    if (collectionNames.length > 0) {
+      console.log(`[Apple Music Lyrics Bridge] Received ${collectionType} track metadata`, {
+        collections: collectionNames,
+        trackCount: tracks.length,
+        tracks: tracks.map(({ artistName, trackName, albumName, duration }) => ({ artistName, trackName, albumName, duration }))
+      });
+    }
     if (tracks.length === 0) return;
-    window.postMessage({ type: messageType, kind: "album-tracks", tracks }, location.origin);
+    window.postMessage({ type: messageType, kind: "collection-tracks", tracks }, location.origin);
   }
 
   function handleResponse(request, response) {
     if (!request || !response.ok) return;
     response.clone().json().then((payload) => {
       if (request.kind === "lyrics") postMatchingLyrics(request.catalogId, payload);
-      if (request.kind === "album-tracks") postAlbumTracks(request.albumIDs, payload);
+      if (request.kind === "collection-tracks") postCollectionTracks(request.collectionIDs, request.collectionType, payload);
     }).catch(() => {});
   }
 
@@ -113,7 +132,7 @@
         try {
           const payload = this.responseType === "json" ? this.response : JSON.parse(this.responseText);
           if (request.kind === "lyrics") postMatchingLyrics(request.catalogId, payload);
-          if (request.kind === "album-tracks") postAlbumTracks(request.albumIDs, payload);
+          if (request.kind === "collection-tracks") postCollectionTracks(request.collectionIDs, request.collectionType, payload);
         } catch {
           // Ignore responses that are not readable JSON.
         }

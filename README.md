@@ -113,7 +113,7 @@ Successful GET responses include `source`, identifying where the returned lyrics
 
 #### Chrome extension
 
-The unpacked Chrome extension watches Apple Music lyric and album-track responses, pairs them in memory, converts TTML into line-timed LRC, and uploads lyrics using artist, track, album, and duration. The proxy stores only the metadata-keyed LRC. Word-synced lyrics are grouped by lyric line; per-word timings are not retained. It runs automatically on `music.apple.com` and logs converted LRC and upload status in that tab's DevTools console. It does not log the full Apple response.
+The unpacked Chrome extension watches Apple Music lyric, album, and library-playlist responses, pairs them in memory, converts TTML into line-timed LRC, and uploads lyrics using artist, track, album, and duration. The proxy stores only the metadata-keyed LRC. Word-synced lyrics are grouped by lyric line; per-word timings are not retained. It runs automatically on `music.apple.com` and logs extracted album/playlist metadata, converted LRC, and upload status in that tab's DevTools console. It does not log the full Apple response.
 
 1. Start the proxy with `docker compose up -d`.
 2. In Chrome 111 or later, open `chrome://extensions` and enable **Developer mode**.

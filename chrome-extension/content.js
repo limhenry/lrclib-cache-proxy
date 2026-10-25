@@ -67,7 +67,7 @@
     const message = event.data;
     if (message?.type !== messageType) return;
 
-    if (message.kind === "album-tracks" && Array.isArray(message.tracks)) {
+    if (message.kind === "collection-tracks" && Array.isArray(message.tracks)) {
       for (const metadata of message.tracks) {
         const catalogId = String(metadata?.catalogId || "");
         if (!/^\d+$/.test(catalogId) || !metadata.artistName || !metadata.trackName || !metadata.albumName || !Number.isFinite(metadata.duration)) continue;

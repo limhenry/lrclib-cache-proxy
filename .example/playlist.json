@@ -1,0 +1,1229 @@
+{
+    "data": [
+        {
+            "id": "p.PkxV8JPu2xVE1YG",
+            "type": "library-playlists",
+            "href": "/v1/me/library/playlists/p.PkxV8JPu2xVE1YG?l=en-GB",
+            "attributes": {
+                "artwork": {
+                    "hasP3": false,
+                    "height": 1200,
+                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/6d/0c/cd/6d0ccdd6-ce44-a774-2a68-a1a15b1477bb/mzl.tfxrqdgx.jpg/{w}x{h}SC.FPESS05.jpg",
+                    "width": 1200
+                },
+                "canDelete": true,
+                "canEdit": false,
+                "dateAdded": "2026-09-28T07:23:59Z",
+                "description": {
+                    "standard": "The Mandopop band make anthems for everyday life."
+                },
+                "hasCatalog": true,
+                "hasCollaboration": false,
+                "isPublic": false,
+                "lastModifiedDate": "2026-09-28T07:23:59Z",
+                "name": "Mayday Essentials",
+                "playParams": {
+                    "globalId": "pl.7fd415ab50614e71a538e3649da18e13",
+                    "id": "p.PkxV8JPu2xVE1YG",
+                    "isLibrary": true,
+                    "kind": "playlist",
+                    "versionHash": "f1b4b8e5a83a5e8f9c04bb6e7e53d6f689d9f5394dab9a81ede90e3952ab0d12"
+                }
+            },
+            "relationships": {
+                "tracks": {
+                    "href": "/v1/me/library/playlists/p.PkxV8JPu2xVE1YG/tracks?l=en-GB",
+                    "data": [
+                        {
+                            "id": "a.1787701119",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1787701119?l=en-GB",
+                            "attributes": {
+                                "albumName": "任性 (電視劇《難哄》主題曲) - Single",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/51/05/f9/5105f921-2e5a-23dc-4c90-c0d7e3ed79c1/1.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 265000,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "任性 (電視劇《難哄》主題曲)",
+                                "playParams": {
+                                    "catalogId": "1787701119",
+                                    "id": "a.1787701119",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1787701119"
+                                },
+                                "releaseDate": "2024-12-30",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1606885164",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1606885164?l=en-GB",
+                            "attributes": {
+                                "albumName": "五月天 好好好想見到你 Mayday fly to 2022 線上特別版 LIVE",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/9c/e5/88/9ce5885a-6e67-46fc-f6e3-fcd6d2e63afb/1.mayday-2022-_4000x4000.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 273023,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "人生海海 (LIVE)",
+                                "playParams": {
+                                    "catalogId": "1606885164",
+                                    "id": "a.1606885164",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1606885164"
+                                },
+                                "releaseDate": "2022-01-30",
+                                "trackNumber": 3
+                            }
+                        },
+                        {
+                            "id": "a.1080945082",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1080945082?l=en-GB",
+                            "attributes": {
+                                "albumName": "傷心的人別聽慢歌 (貫徹快樂) - Single",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/55/08/03/5508033c-dc04-ff0d-cbf2-c723ae63baed/sad.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 215556,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "傷心的人別聽慢歌 (貫徹快樂)",
+                                "playParams": {
+                                    "catalogId": "1080945082",
+                                    "id": "a.1080945082",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1080945082"
+                                },
+                                "releaseDate": "2013-06-21",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1546336919",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1546336919?l=en-GB",
+                            "attributes": {
+                                "albumName": "因為你 所以我 - Single",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/66/8e/27/668e2773-ae1b-2211-38b0-73fa96ccd07b/1._1500_OLa-03.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 281216,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "因為你 所以我",
+                                "playParams": {
+                                    "catalogId": "1546336919",
+                                    "id": "a.1546336919",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1546336919"
+                                },
+                                "releaseDate": "2020-12-25",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1463565283",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1463565283?l=en-GB",
+                            "attributes": {
+                                "albumName": "五月天 人生無限公司 Life Live 好友加班篇",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/0c/15/a3/0c15a3ea-3ac3-f472-6685-5c48c199d082/1.5.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 224947,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "私奔到月球 (feat. 陳綺貞) [Life Live]",
+                                "playParams": {
+                                    "catalogId": "1463565283",
+                                    "id": "a.1463565283",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1463565283"
+                                },
+                                "releaseDate": "2019-05-15",
+                                "trackNumber": 4
+                            }
+                        },
+                        {
+                            "id": "a.1207222274",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207222274?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 273947,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "步步",
+                                "playParams": {
+                                    "catalogId": "1207222274",
+                                    "id": "a.1207222274",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207222274"
+                                },
+                                "releaseDate": "2013-11-23",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1081297131",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081297131?l=en-GB",
+                            "attributes": {
+                                "albumName": "第二人生 (末日版)",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/6f/aa/30/6faa3012-14d1-c18c-40b6-47a170d096a8/BD0056-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 265667,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "我不願讓你一個人",
+                                "playParams": {
+                                    "catalogId": "1081297131",
+                                    "id": "a.1081297131",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081297131"
+                                },
+                                "releaseDate": "2011-12-16",
+                                "trackNumber": 6
+                            }
+                        },
+                        {
+                            "id": "a.1158763991",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158763991?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 202388,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "如果我們不曾相遇",
+                                "playParams": {
+                                    "catalogId": "1158763991",
+                                    "id": "a.1158763991",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158763991"
+                                },
+                                "releaseDate": "2016-06-22",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1081309220",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081309220?l=en-GB",
+                            "attributes": {
+                                "albumName": "第二人生 (明日版)",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7d/43/10/7d4310fc-3583-7628-d28c-e336b664d35b/BD0055-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 339893,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "諾亞方舟",
+                                "playParams": {
+                                    "catalogId": "1081309220",
+                                    "id": "a.1081309220",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081309220"
+                                },
+                                "releaseDate": "2011-12-08",
+                                "trackNumber": 11
+                            }
+                        },
+                        {
+                            "id": "a.183919743",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.183919743?l=en-GB",
+                            "attributes": {
+                                "albumName": "神的孩子都在跳舞",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music/07/f2/90/mzi.xhevnauo.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 261560,
+                                "genreNames": [
+                                    "Chinese Rock"
+                                ],
+                                "hasLyrics": true,
+                                "name": "倔強",
+                                "playParams": {
+                                    "catalogId": "183919743",
+                                    "id": "a.183919743",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "183919743"
+                                },
+                                "releaseDate": "2004-11-05",
+                                "trackNumber": 2
+                            }
+                        },
+                        {
+                            "id": "a.1103633569",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1103633569?l=en-GB",
+                            "attributes": {
+                                "albumName": "原聲帶精選-超級劇無霸",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/c1/36/ea/c136ea5d-08a1-092c-70bc-ddd652b61630/bar-2-OK-1.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 219115,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "將軍令 (電影\"黃飛鴻\"主題曲)",
+                                "playParams": {
+                                    "catalogId": "1103633569",
+                                    "id": "a.1103633569",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1103633569"
+                                },
+                                "releaseDate": "2014-11-15",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1081381266",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081381266?l=en-GB",
+                            "attributes": {
+                                "albumName": "後 青春期的詩",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music69/v4/fd/ba/9e/fdba9e89-6336-d3e4-ee00-94184f9a5c2c/BD0016-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 265867,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "突然好想你",
+                                "playParams": {
+                                    "catalogId": "1081381266",
+                                    "id": "a.1081381266",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081381266"
+                                },
+                                "releaseDate": "2008-05-18",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1158763993",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158763993?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 198552,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "好好 (想把你寫成一首歌)",
+                                "playParams": {
+                                    "catalogId": "1158763993",
+                                    "id": "a.1158763993",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158763993"
+                                },
+                                "releaseDate": "2016-07-21",
+                                "trackNumber": 3
+                            }
+                        },
+                        {
+                            "id": "a.162130094",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.162130094?l=en-GB",
+                            "attributes": {
+                                "albumName": "Mayday's First Album",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d2/08/04/d20804bd-0db9-495a-b1c7-07a8ce4a49ec/dj.wvvcuujf.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 281867,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "Peter & Mary",
+                                "playParams": {
+                                    "catalogId": "162130094",
+                                    "id": "a.162130094",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "162130094"
+                                },
+                                "releaseDate": "1999-01-01",
+                                "trackNumber": 8
+                            }
+                        },
+                        {
+                            "id": "a.1158763996",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158763996?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 346282,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "後來的我們",
+                                "playParams": {
+                                    "catalogId": "1158763996",
+                                    "id": "a.1158763996",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158763996"
+                                },
+                                "releaseDate": "2016-07-21",
+                                "trackNumber": 6
+                            }
+                        },
+                        {
+                            "id": "a.1081397797",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081397797?l=en-GB",
+                            "attributes": {
+                                "albumName": "為愛而生",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6f/69/4a/6f694aa4-0be7-8949-d50d-59e28c1f4e74/BD0005-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 250733,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "天使",
+                                "playParams": {
+                                    "catalogId": "1081397797",
+                                    "id": "a.1081397797",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081397797"
+                                },
+                                "releaseDate": "2006-12-29",
+                                "trackNumber": 3
+                            }
+                        },
+                        {
+                            "id": "a.1080880430",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1080880430?l=en-GB",
+                            "attributes": {
+                                "albumName": "勇敢 - Single",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music49/v4/4d/fe/db/4dfedb12-3928-1f6b-314e-a1d99d08b7ea/1500cover.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 278413,
+                                "genreNames": [
+                                    "Tai-Pop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "勇敢",
+                                "playParams": {
+                                    "catalogId": "1080880430",
+                                    "id": "a.1080880430",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1080880430"
+                                },
+                                "releaseDate": "2015-12-30",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1158763997",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158763997?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 264295,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "頑固",
+                                "playParams": {
+                                    "catalogId": "1158763997",
+                                    "id": "a.1158763997",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158763997"
+                                },
+                                "releaseDate": "2016-07-21",
+                                "trackNumber": 7
+                            }
+                        },
+                        {
+                            "id": "a.1207222571",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207222571?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 271493,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "離開地球表面",
+                                "playParams": {
+                                    "catalogId": "1207222571",
+                                    "id": "a.1207222571",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207222571"
+                                },
+                                "releaseDate": "2013-12-27",
+                                "trackNumber": 10
+                            }
+                        },
+                        {
+                            "id": "a.1158764001",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158764001?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 306573,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "終於結束的起點",
+                                "playParams": {
+                                    "catalogId": "1158764001",
+                                    "id": "a.1158764001",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158764001"
+                                },
+                                "releaseDate": "2016-07-21",
+                                "trackNumber": 11
+                            }
+                        },
+                        {
+                            "id": "a.1207223050",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207223050?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 2,
+                                "durationInMillis": 273059,
+                                "genreNames": [
+                                    "Tai-Pop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "憨人",
+                                "playParams": {
+                                    "catalogId": "1207223050",
+                                    "id": "a.1207223050",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207223050"
+                                },
+                                "releaseDate": "2013-12-27",
+                                "trackNumber": 15
+                            }
+                        },
+                        {
+                            "id": "a.1659802400",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1659802400?l=en-GB",
+                            "attributes": {
+                                "albumName": "為你寫下這首情歌 - Single",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/f6/ca/a9/f6caa90e-3f1d-e633-3b46-3e81e1e4c2ff/4710616565119.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 241000,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "為你寫下這首情歌",
+                                "playParams": {
+                                    "catalogId": "1659802400",
+                                    "id": "a.1659802400",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1659802400"
+                                },
+                                "releaseDate": "2022-12-14",
+                                "trackNumber": 1
+                            }
+                        },
+                        {
+                            "id": "a.1207222967",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207222967?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 2,
+                                "durationInMillis": 288640,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "最重要的小事",
+                                "playParams": {
+                                    "catalogId": "1207222967",
+                                    "id": "a.1207222967",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207222967"
+                                },
+                                "releaseDate": "2006-12-29",
+                                "trackNumber": 9
+                            }
+                        },
+                        {
+                            "id": "a.1207222421",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207222421?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 275680,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "洋蔥",
+                                "playParams": {
+                                    "catalogId": "1207222421",
+                                    "id": "a.1207222421",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207222421"
+                                },
+                                "releaseDate": "2013-12-27",
+                                "trackNumber": 4
+                            }
+                        },
+                        {
+                            "id": "a.1158763998",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1158763998?l=en-GB",
+                            "attributes": {
+                                "albumName": "自傳",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/64/a0/f1/64a0f1b8-a36b-ff10-509a-9a8f5fef53ff/dj.zfoqlnar.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 249957,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "派對動物",
+                                "playParams": {
+                                    "catalogId": "1158763998",
+                                    "id": "a.1158763998",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1158763998"
+                                },
+                                "releaseDate": "2016-05-20",
+                                "trackNumber": 8
+                            }
+                        },
+                        {
+                            "id": "a.1207222425",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1207222425?l=en-GB",
+                            "attributes": {
+                                "albumName": "步步自選作品輯 1999-2013",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0b/4d/f0/0b4df092-7531-2d96-0c3f-1f330fd9388e/the_best_of_1999-2013.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 207400,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "入陣曲",
+                                "playParams": {
+                                    "catalogId": "1207222425",
+                                    "id": "a.1207222425",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1207222425"
+                                },
+                                "releaseDate": "2013-10-13",
+                                "trackNumber": 6
+                            }
+                        },
+                        {
+                            "id": "a.1081381268",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081381268?l=en-GB",
+                            "attributes": {
+                                "albumName": "後 青春期的詩",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music69/v4/fd/ba/9e/fdba9e89-6336-d3e4-ee00-94184f9a5c2c/BD0016-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 299907,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "你不是真正的快樂",
+                                "playParams": {
+                                    "catalogId": "1081381268",
+                                    "id": "a.1081381268",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081381268"
+                                },
+                                "releaseDate": "2008-05-18",
+                                "trackNumber": 3
+                            }
+                        },
+                        {
+                            "id": "a.162129462",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.162129462?l=en-GB",
+                            "attributes": {
+                                "albumName": "Mayday's First Album",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d2/08/04/d20804bd-0db9-495a-b1c7-07a8ce4a49ec/dj.wvvcuujf.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 254800,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "Embrace",
+                                "playParams": {
+                                    "catalogId": "162129462",
+                                    "id": "a.162129462",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "162129462"
+                                },
+                                "releaseDate": "2003-04-16",
+                                "trackNumber": 2
+                            }
+                        },
+                        {
+                            "id": "a.1081309217",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081309217?l=en-GB",
+                            "attributes": {
+                                "albumName": "第二人生 (明日版)",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7d/43/10/7d4310fc-3583-7628-d28c-e336b664d35b/BD0055-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 300907,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "倉頡",
+                                "playParams": {
+                                    "catalogId": "1081309217",
+                                    "id": "a.1081309217",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081309217"
+                                },
+                                "releaseDate": "2011-12-16",
+                                "trackNumber": 8
+                            }
+                        },
+                        {
+                            "id": "a.1081309222",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081309222?l=en-GB",
+                            "attributes": {
+                                "albumName": "第二人生 (明日版)",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7d/43/10/7d4310fc-3583-7628-d28c-e336b664d35b/BD0055-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 282480,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "OAOA (現在就是永遠)",
+                                "playParams": {
+                                    "catalogId": "1081309222",
+                                    "id": "a.1081309222",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081309222"
+                                },
+                                "releaseDate": "2011-12-16",
+                                "trackNumber": 13
+                            }
+                        },
+                        {
+                            "id": "a.1081738613",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081738613?l=en-GB",
+                            "attributes": {
+                                "albumName": "離開地球表面",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/ad/a5/84/ada5846a-1c4a-1dea-e155-44800eb702a1/BD0007-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 313040,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "知足",
+                                "playParams": {
+                                    "catalogId": "1081738613",
+                                    "id": "a.1081738613",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081738613"
+                                },
+                                "releaseDate": "2007-07-20",
+                                "trackNumber": 5
+                            }
+                        },
+                        {
+                            "id": "a.1081397797",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081397797?l=en-GB",
+                            "attributes": {
+                                "albumName": "為愛而生",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6f/69/4a/6f694aa4-0be7-8949-d50d-59e28c1f4e74/BD0005-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 250733,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "天使",
+                                "playParams": {
+                                    "catalogId": "1081397797",
+                                    "id": "a.1081397797",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081397797"
+                                },
+                                "releaseDate": "2006-12-29",
+                                "trackNumber": 3
+                            }
+                        },
+                        {
+                            "id": "a.1081309216",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081309216?l=en-GB",
+                            "attributes": {
+                                "albumName": "第二人生 (明日版)",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7d/43/10/7d4310fc-3583-7628-d28c-e336b664d35b/BD0055-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 289093,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "乾杯",
+                                "playParams": {
+                                    "catalogId": "1081309216",
+                                    "id": "a.1081309216",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081309216"
+                                },
+                                "releaseDate": "2011-12-16",
+                                "trackNumber": 7
+                            }
+                        },
+                        {
+                            "id": "a.1081397951",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081397951?l=en-GB",
+                            "attributes": {
+                                "albumName": "為愛而生",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6f/69/4a/6f694aa4-0be7-8949-d50d-59e28c1f4e74/BD0005-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 290813,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "最重要的小事",
+                                "playParams": {
+                                    "catalogId": "1081397951",
+                                    "id": "a.1081397951",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081397951"
+                                },
+                                "releaseDate": "2006-12-29",
+                                "trackNumber": 7
+                            }
+                        },
+                        {
+                            "id": "a.1081381272",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081381272?l=en-GB",
+                            "attributes": {
+                                "albumName": "後 青春期的詩",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music69/v4/fd/ba/9e/fdba9e89-6336-d3e4-ee00-94184f9a5c2c/BD0016-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 324973,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "我心中尚未崩壞的地方",
+                                "playParams": {
+                                    "catalogId": "1081381272",
+                                    "id": "a.1081381272",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081381272"
+                                },
+                                "releaseDate": "2008-05-18",
+                                "trackNumber": 7
+                            }
+                        },
+                        {
+                            "id": "a.150097714",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.150097714?l=en-GB",
+                            "attributes": {
+                                "albumName": "Viva Love",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/af/c2/33/afc233f6-d570-8f22-0a91-14a3e289a30d/dj.uhlsejtl.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 269533,
+                                "genreNames": [
+                                    "Chinese Rock"
+                                ],
+                                "hasLyrics": true,
+                                "name": "Tenderness",
+                                "playParams": {
+                                    "catalogId": "150097714",
+                                    "id": "a.150097714",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "150097714"
+                                },
+                                "releaseDate": "2000-07-07",
+                                "trackNumber": 10
+                            }
+                        },
+                        {
+                            "id": "a.1081381277",
+                            "type": "library-songs",
+                            "href": "/v1/me/library/songs/a.1081381277?l=en-GB",
+                            "attributes": {
+                                "albumName": "後 青春期的詩",
+                                "artistName": "Mayday",
+                                "artwork": {
+                                    "hasP3": false,
+                                    "height": 1200,
+                                    "url": "https://is1-ssl.mzstatic.com/image/thumb/Music69/v4/fd/ba/9e/fdba9e89-6336-d3e4-ee00-94184f9a5c2c/BD0016-_-.jpg/{w}x{h}bb.jpg",
+                                    "width": 1200
+                                },
+                                "discNumber": 1,
+                                "durationInMillis": 254000,
+                                "genreNames": [
+                                    "Mandopop"
+                                ],
+                                "hasLyrics": true,
+                                "name": "笑忘歌",
+                                "playParams": {
+                                    "catalogId": "1081381277",
+                                    "id": "a.1081381277",
+                                    "isLibrary": true,
+                                    "kind": "song",
+                                    "reporting": true,
+                                    "reportingId": "1081381277"
+                                },
+                                "releaseDate": "2008-05-18",
+                                "trackNumber": 12
+                            }
+                        }
+                    ],
+                    "meta": {
+                        "total": 37
+                    }
+                }
+            }
+        }
+    ]
+}
